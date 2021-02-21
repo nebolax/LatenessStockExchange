@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/nebolax/LatenessStockExcahnge/Database"
-	"github.com/nebolax/LatenessStockExcahnge/Verifier"
+	"github.com/nebolax/LatenessStockExcahnge/database"
+	"github.com/nebolax/LatenessStockExcahnge/verifier"
 )
 
 func main() {
 	test()
-	Database.TestDb()
-	Verifier.CheckTest()
+	database.Init()
+	verifier.CheckTest()
 }
