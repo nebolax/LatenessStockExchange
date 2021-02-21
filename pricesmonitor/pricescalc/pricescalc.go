@@ -15,7 +15,7 @@ type stockDataHandler struct {
 
 //RTPriceCalculator is a channel using which you will get stock prices in real time
 type RTPriceCalculator struct {
-	Name       string
+	Name       int
 	curHandler *stockDataHandler
 	LivePrice  chan float64
 }
@@ -33,10 +33,10 @@ func (dh *stockDataHandler) newPrice() float64 {
 }
 
 //CreatePriceCalculator is func
-func CreatePriceCalculator(name string, startStock float64, offers, sharesInTrade int) RTPriceCalculator {
+func CreatePriceCalculator(id int, startStock float64, offers, sharesInTrade int) RTPriceCalculator {
 	curHandler := stockDataHandler{curStock: startStock, curOffers: offers, sharesInTrade: sharesInTrade}
 	livePrice := make(chan float64)
-	priceObs := RTPriceCalculator{name, &curHandler, livePrice}
+	priceObs := RTPriceCalculator{id, &curHandler, livePrice}
 
 	go updatePrices(&priceObs)
 
