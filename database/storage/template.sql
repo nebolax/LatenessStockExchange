@@ -21,7 +21,7 @@ CREATE TABLE 'user_stock_ownerships' (
 
 CREATE TABLE 'price_logs' (
     'stock_id' INTEGER NOT NULL,
-    'price' INTEGER NOT NULL,
+    'price' FLOAT(10) NOT NULL,
     'timestamp' DATETIME NULL
 );
 

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"io/ioutil"
 	"strings"
 )
@@ -13,7 +14,9 @@ var tableNameList = [7]string{"users", "stocks", "user_stock_ownerships",
 
 func checkError(err error) bool{
 	if err != nil {
-		panic(err)
+		if general.DebugMode {
+			panic(err)
+		}
 		return false
 	}
 	return true
