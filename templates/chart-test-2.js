@@ -1,5 +1,3 @@
-console.log("azaza");
-
 var ctx = document.getElementById('chart').getContext('2d');
 ctx.canvas.width = 1000;
 ctx.canvas.height = 1000;

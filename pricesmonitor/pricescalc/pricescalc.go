@@ -15,7 +15,7 @@ type stockDataHandler struct {
 
 //RTPriceCalculator is a channel using which you will get stock prices in real time
 type RTPriceCalculator struct {
-	Name       int
+	ID         int
 	curHandler *stockDataHandler
 	LivePrice  chan float64
 }

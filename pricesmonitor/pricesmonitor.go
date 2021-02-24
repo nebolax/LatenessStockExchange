@@ -26,6 +26,6 @@ func init() {
 func observeStock(calc *pricescalc.RTPriceCalculator) {
 	for {
 		nprice := <-calc.LivePrice
-		fmt.Printf("Stock '%d', price: %f", calc.Name, nprice)
+		fmt.Printf("Stock '%d', price: %f", calc.ID, nprice)
 	}
 }
