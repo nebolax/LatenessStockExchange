@@ -12,7 +12,9 @@ import (
 
 //Message is a struct
 type Message struct {
-	Value int `json:"value"`
+	Type        string  `json:"type"`
+	OffersCount int     `json:"offersCount"`
+	StockPrice  float64 `json:"stockPrice"`
 }
 
 var clients = make(map[*websocket.Conn]bool) // connected clients
@@ -34,18 +36,7 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	}
 
 	clients[ws] = true
-
-	// for {
-	// 	var msg Message
-	// 	err := ws.ReadJSON(&msg)
-	// 	if err != nil {
-	// 		log.Printf("error: %v", err)
-	// 		delete(clients, ws)
-	// 		break
-	// 	}
-
-	// 	broadcast <- msg
-	// }
+	println("accepted new client")
 }
 
 // func handleMessages() {
@@ -64,24 +55,23 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 // }
 
 func updateData() {
-	value := 0
+	value := 1.0
 	for {
 		timer := time.NewTimer(1 * time.Second)
 		<-timer.C
 
-		value++
+		value *= 1.1
 
 		for client := range clients {
-			err := client.WriteJSON(Message{value})
+			err := client.WriteJSON(Message{Type: "gpoint", StockPrice: value, OffersCount: int(value)})
 			if err != nil {
 				log.Printf("error: %v", err)
 				defer client.Close()
 				delete(clients, client)
 			} else {
-				fmt.Println("succ sent")
 			}
 		}
-		fmt.Printf("Sent value %d; Current clients count: %d\n", value, len(clients))
+		fmt.Printf("Sent value %f; Current clients count: %d\n", value, len(clients))
 	}
 }
 
