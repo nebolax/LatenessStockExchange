@@ -27,14 +27,30 @@ var chart = new Chart(ctx, {
     }
 });
 
-ws = new WebSocket('ws://' + window.location.host + '/ws');
+ws = new WebSocket('ws://' + window.location.host + "/ws" + window.location.pathname);
 ws.onmessage = function(e) {
     var message = JSON.parse(e.data);
     switch (message.type) {
+        case "setup":
+            console.log("stocks: " + message.history);
+            var conf = chart.config.data;
+            conf.labels = [];
+            conf.datasets[0].data = []
+            for (let i = 0; i < message.history.length; i++) {
+                conf.labels.push(0);
+                conf.datasets[0].data.push(message.history[i])
+            }
+            chart.update();
+            vm.curOffers = message.offers;
+            break;
         case "gpoint":
             var conf = chart.config.data;
             conf.labels.push(0);
             conf.datasets[0].data.push(message.stockPrice);
+            if (conf.labels.length > 20) {
+                conf.labels = conf.labels.slice(conf.labels.length - 20)
+                conf.datasets[0].data = conf.datasets[0].data.slice(conf.datasets[0].data.length - 20)
+            }
             chart.update();
             break;
         case "offers":

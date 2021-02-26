@@ -5,11 +5,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"regexp"
-	"time"
+	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/gorilla/websocket"
+	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor"
 )
 
 //OutcomingMessage is a struct
@@ -19,13 +20,35 @@ type OutcomingMessage struct {
 	StockPrice  float64 `json:"stockPrice"`
 }
 
-//IncomingMessage is struct too
-type IncomingMessage struct {
+//incomingMessage is struct too
+type incomingMessage struct {
 	OfferType string `json:"offerType"`
 }
+type graphPageSetup struct {
+	Type      string    `json:"type"`
+	History   []float64 `json:"history"`
+	CurOffers int       `json:"offers"`
+}
 
-var clients = make(map[*websocket.Conn]bool) // connected clients
-var broadcast = make(chan int)               // broadcast channel
+var (
+	clients   = make(map[*websocket.Conn]int)
+	broadcast = make(chan int)
+	key       = []byte("super-secret-key")
+	store     = sessions.NewCookieStore(key)
+)
+
+func getUserID(w http.ResponseWriter, r *http.Request) int {
+	session, _ := store.Get(r, "user-info")
+	id, ok := session.Values["userid"].(int)
+
+	if !ok || (id == 0) {
+		session.Values["userid"] = 0
+		session.Save(r, w)
+		return 0
+	}
+
+	return id
+}
 
 func checkerr(err error) {
 	if err != nil {
@@ -33,23 +56,10 @@ func checkerr(err error) {
 	}
 }
 
-func replFunc(inp []byte) []byte {
-	expr := regexp.MustCompile(`src="(.+?)"`)
-	path := expr.FindStringSubmatch(string(inp))[1]
-	rawData, err := ioutil.ReadFile("./templates/" + path)
-	checkerr(err)
-	return append([]byte("<script>\n"), append(rawData, []byte("\n</script>")...)...)
-}
-
-func insertScripts(pathToHTML string) string {
-	rawData, err := ioutil.ReadFile("./templates/" + pathToHTML)
-	checkerr(err)
-	expr := regexp.MustCompile("<script type=\"text/javascript\" src=\".+?\"></script>")
-	return string(expr.ReplaceAllFunc(rawData, replFunc))
-}
-
 func mhandler(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte(insertScripts("index.html")))
+	html, err := ioutil.ReadFile("./templates/graph-page.html")
+	checkerr(err)
+	w.Write(html)
 }
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
@@ -58,15 +68,23 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	clients[ws] = true
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
+	clients[ws] = id
 	defer ws.Close()
 
+	if calc := pricesmonitor.CalcByID(id); calc != nil {
+		fmt.Printf("Id: %d, Offs: %d, st: %#v\n", calc.ID, calc.CurHandler.CurOffers, calc.History)
+		ws.WriteJSON(graphPageSetup{"setup", calc.History, calc.CurHandler.CurOffers})
+	}
+
+	//Reading data from clients
 	for {
-		var msg IncomingMessage
+		var msg incomingMessage
 		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)
 		if err != nil {
-			log.Printf("error: %v", err)
 			delete(clients, ws)
 			break
 		}
@@ -76,39 +94,21 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 		} else if msg.OfferType == "buy" {
 			inc = 1
 		}
-		broadcast <- inc
+		for _, calc := range pricesmonitor.AllCalculators {
+			if calc.ID == id {
+				calc.IncOffers(inc)
+			}
+		}
 		fmt.Printf("New message: %s\n", msg.OfferType)
 	}
 }
 
-func handleMessages() {
-	curVal := 0
-	for {
-		curVal += <-broadcast
-
-		for client := range clients {
-			err := client.WriteJSON(OutcomingMessage{Type: "offers", OffersCount: curVal})
+//UpdateData is func
+func UpdateData(id int, message OutcomingMessage) {
+	for client := range clients {
+		if clients[client] == id {
+			err := client.WriteJSON(message)
 			if err != nil {
-				log.Printf("error: %v", err)
-				defer client.Close()
-				delete(clients, client)
-			}
-		}
-	}
-}
-
-func updateData() {
-	value := 1.0
-	for {
-		timer := time.NewTimer(1 * time.Second)
-		<-timer.C
-
-		value *= 1.1
-
-		for client := range clients {
-			err := client.WriteJSON(OutcomingMessage{Type: "gpoint", StockPrice: value})
-			if err != nil {
-				log.Printf("error: %v", err)
 				defer client.Close()
 				delete(clients, client)
 			}
@@ -117,23 +117,25 @@ func updateData() {
 }
 
 func test(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("lol")
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	id++
+	file, _ := ioutil.ReadFile("./templates/graph-page.html")
+	w.Write(file)
 }
 
 //StartServer is func
 func StartServer() {
-	insertScripts("index.html")
-
 	router := mux.NewRouter().StrictSlash(true)
+	router.
+		PathPrefix("/static/").
+		Handler(http.StripPrefix("/static", http.FileServer(http.Dir("./templates"))))
 
 	router.HandleFunc("/", mhandler)
-	router.HandleFunc("/products/{id:[0-9]+}", test)
+	router.HandleFunc("/graph{id:[0-9]+}", test)
 
-	http.HandleFunc("/ws", handleConnections)
+	router.HandleFunc("/ws/graph{id:[0-9]+}", handleConnections)
 	http.Handle("/", router)
-
-	go updateData()
-	go handleMessages()
 
 	log.Println("starting http server at port 8090")
 	if err := http.ListenAndServe(":8090", nil); err != nil {
