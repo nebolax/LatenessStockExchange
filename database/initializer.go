@@ -9,23 +9,11 @@ import (
 	"strings"
 )
 
+// List of names of database tables. It is used to check if database is incomplete
 var tableNameList = [7]string{"users", "stocks", "user_stock_ownerships",
 	"price_logs", "transaction_logs", "comes_in", "event_logs"}
 
-func checkError(err error) bool{
-	if err != nil {
-		if general.DebugMode {
-			panic(err)
-		}
-		return false
-	}
-	return true
-}
-
-func remove(slice []string, s int) []string {
-	return append(slice[:s], slice[s+1:]...)
-}
-
+// Check tables for incompleteness. Returns true if everything is OK.
 func checkTables(db *sql.DB) bool {
 	tables, err := db.Query("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
 	if !checkError(err) {
@@ -40,7 +28,7 @@ func checkTables(db *sql.DB) bool {
 		}
 		for index, value := range  tablesNames {
 			if value == name {
-				tablesNames = remove(tablesNames, index)
+				tablesNames = general.Remove(tablesNames, index)
 				break
 			}
 		}
@@ -49,6 +37,7 @@ func checkTables(db *sql.DB) bool {
 	return len(tablesNames) == 0
 }
 
+// Generate tables from start (if smth is wrong)
 func createTables(db *sql.DB) {
 	fmt.Println("Creating new tables")
 	file, err := ioutil.ReadFile("database\\storage\\template.sql")
@@ -63,6 +52,7 @@ func createTables(db *sql.DB) {
 	}
 }
 
+// Initialization of database. If something is wrong, recreate all database
 func Init() {
 	db, err := sql.Open("sqlite3", "database\\storage\\database.db")
 	checkError(err)

@@ -3,7 +3,8 @@ CREATE TABLE 'users' (
     'username' VARCHAR (255) UNIQUE NOT NULL,
     'email' VARCHAR (255) UNIQUE NOT NULL,
     'password_hash' VARCHAR (255) NOT NULL,
-    'password_salt' VARCHAR (255) NOT NULL
+    'password_salt' VARCHAR (255) NOT NULL,
+    'money' FLOAT (10)
 );
 
 CREATE TABLE 'stocks' (
@@ -29,7 +30,7 @@ CREATE TABLE 'transaction_logs' (
     'user_id' INTEGER NOT NULL,
     'stock_id' INTEGER NOT NULL,
     'amount' INTEGER NOT NULL,
-    'money_spent' INTEGER,
+    'money_spent' FLOAT (10),
     'type' INTEGER,
     'timestamp' DATETIME NULL
 );
