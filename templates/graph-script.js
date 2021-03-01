@@ -32,7 +32,6 @@ ws.onmessage = function(e) {
     var message = JSON.parse(e.data);
     switch (message.type) {
         case "setup":
-            console.log("stocks: " + message.history);
             var conf = chart.config.data;
             conf.labels = [];
             conf.datasets[0].data = []
