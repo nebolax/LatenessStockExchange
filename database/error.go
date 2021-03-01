@@ -4,11 +4,11 @@ import "github.com/nebolax/LatenessStockExcahnge/general"
 
 // Main database error object
 type DatabaseError struct {
-	message string
+	Message string
 }
 
 func (dbErr DatabaseError) Error() string {
-	return dbErr.message
+	return dbErr.Message
 }
 
 // Check error for null-ness (if there any exception)

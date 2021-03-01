@@ -19,36 +19,45 @@ const (
 const datetimeFormat = "2000-01-01 11:12:13"
 
 // Count amount of stockId stock owned by buyerId
-func getResources(buyerId int, stockId int) int {
+func getResources(buyerId int, stockId int) (int, error) {
 	count, err := dataBase.Query(fmt.Sprintf(
-		"SELECT amount from user_stock_ownership WHERE (user_id = %d) AND (stock_id = %d)", buyerId, stockId))
+		"SELECT amount FROM user_stock_ownerships WHERE (user_id = %d) AND (stock_id = %d)", buyerId, stockId))
 	if !checkError(err) {
-		return 0
+		return 0, err
 	}
 
-	if count.Next() {
+
+	for count.Next() {
 		var countInt int
-		count.Scan(&countInt)
-		return countInt
-	} else {
-		return 0
+		err = count.Scan(&countInt)
+		if !checkError(err) {
+			return 0, err
+		}
+
+		return countInt, nil
 	}
+
+	return 0, nil
+
 }
 
-func getGritscoins(userId int) float64 {
+func getGritscoins(userId int) (float64, error) {
 	count, err := dataBase.Query(fmt.Sprintf(
-		"SELECT money from users WHERE (user_id = %d)", userId))
+		"SELECT money FROM users WHERE (id = %d)", userId))
 	if !checkError(err) {
-		return 0
+		return 0, err
 	}
 
-	if count.Next() {
+	for count.Next() {
 		var amount float64
-		count.Scan(&amount)
-		return amount
-	} else {
-		return 0
+		err = count.Scan(&amount)
+		if !checkError(err) {
+			return 0, err
+		}
+		return amount, nil
 	}
+
+	return 0, DatabaseError{"No such user"}
 }
 
 // Makes transaction between sellerId and buyerId, where
@@ -56,11 +65,29 @@ func getGritscoins(userId int) float64 {
 func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, currentPrice float64) error {
 	totalDealPrice := currentPrice * float64(amount)
 
-	buyerGritscoins := getGritscoins(buyerId)
-	buyerStocks := getResources(buyerId, stockId)
+	buyerGritscoins, err := getGritscoins(buyerId)
 
-	sellerGritscoins := getGritscoins(sellerId)
-	sellerStocks := getResources(sellerId, stockId)
+	if !checkError(err) {
+		return err
+	}
+
+	buyerStocks, err := getResources(buyerId, stockId)
+
+	if !checkError(err) {
+		return err
+	}
+
+	sellerGritscoins, err := getGritscoins(sellerId)
+
+	if !checkError(err) {
+		return err
+	}
+
+	sellerStocks, err := getResources(sellerId, stockId)
+
+	if !checkError(err) {
+		return err
+	}
 
 	if buyerGritscoins < totalDealPrice {
 		return DatabaseError{"Buyer has not enough money for deal"}
@@ -75,7 +102,7 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 	baseMoney := "UPDATE users SET money = %f WHERE (user_id = %d)"
 
 	updateSellerStocks := fmt.Sprintf(baseStock, sellerStocks - amount, sellerId, stockId)
-	_, err := dataBase.Exec(updateSellerStocks)
+	_, err = dataBase.Exec(updateSellerStocks)
 	if !checkError(err) {
 		return err
 	}

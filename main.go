@@ -9,6 +9,6 @@ import (
 // Main function to call all other functions
 func main() {
 	test()
-	database.Init()
+	database.Init(database.StandartPath)
 	verifier.CheckTest()
 }

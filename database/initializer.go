@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+const StandartPath = "database\\storage\\database.sqlite"
+const testPath = "storage\\test.sqlite"
+
+
 // List of names of database tables. It is used to check if database is incomplete
 var tableNameList = [7]string{"users", "stocks", "user_stock_ownerships",
 	"price_logs", "transaction_logs", "comes_in", "event_logs"}
@@ -17,9 +21,12 @@ var tableNameList = [7]string{"users", "stocks", "user_stock_ownerships",
 func checkTables(db *sql.DB) bool {
 	tables, err := db.Query("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
 	if !checkError(err) {
+		print("CRINGE!!!\n" + err.Error())
 		return false
 	}
-	tablesNames := tableNameList[:]
+	tablesNames := make([]string, len(tableNameList))
+	copy(tablesNames, tableNameList[:])
+
 	for tables.Next(){
 		var name string
 		err := tables.Scan(&name)
@@ -40,21 +47,21 @@ func checkTables(db *sql.DB) bool {
 // Generate tables from start (if smth is wrong)
 func createTables(db *sql.DB) {
 	fmt.Println("Creating new tables")
-	file, err := ioutil.ReadFile("database\\storage\\template.sql")
+	file, err := ioutil.ReadFile("storage\\template.sql")
 	checkError(err)
 
 	requests := strings.Split(string(file), ";")
 
 	for _, request := range requests {
-		result, err := db.Exec(request)
+		_, err := db.Exec(request)
 		checkError(err)
-		fmt.Println(result)
+		//fmt.Println(result)
 	}
 }
 
 // Initialization of database. If something is wrong, recreate all database
-func Init() {
-	db, err := sql.Open("sqlite3", "database\\storage\\database.db")
+func Init(name string) {
+	db, err := sql.Open("sqlite3", name)
 	checkError(err)
 	var dbOk = checkTables(db)
 	if !dbOk {
@@ -64,3 +71,4 @@ func Init() {
 	initialized = true
 	dataBase = db
 }
+

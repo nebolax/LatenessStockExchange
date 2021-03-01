@@ -9,7 +9,7 @@ func AddStock(name string, traderId int) error {
 	}
 
 	_, err := dataBase.Exec(fmt.Sprintf(
-		"INSERT INTO stocks (name, user_id, come_in_time) values ('%s', '%d', 'NULL')",
+		"INSERT INTO stocks (name, user_id) values ('%s', %d)",
 		name, traderId))
 
 	return err
