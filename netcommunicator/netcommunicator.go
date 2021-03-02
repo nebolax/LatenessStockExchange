@@ -2,14 +2,15 @@ package netcommunicator
 
 import (
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/database"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
 	"strconv"
+
+	"github.com/nebolax/LatenessStockExcahnge/database"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 
 	"golang.org/x/crypto/bcrypt"
 
