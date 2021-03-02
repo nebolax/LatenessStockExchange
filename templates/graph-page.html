@@ -1,0 +1,30 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Stock graph</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+
+</head>
+
+<body>
+    <div id="main">
+        <div>
+            <canvas id="chart"></canvas>
+        </div>
+        <div>
+            <button id="buyOfferBtn" style="width: 45%; height: 7%;">Offer buy</button>
+            <button id="sellOfferBtn" style="width: 45%; height: 7%; float: right;">Offer sell</button>
+        </div>
+        <div>
+            <p>Current offers: {{ curOffers }}</p>
+        </div>
+    </div>
+    <script type="text/javascript" src="/static/graph-script.js"></script>
+</body>
+
+</html>
