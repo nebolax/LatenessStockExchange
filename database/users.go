@@ -174,7 +174,7 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 	var result = make([]Ownership, 0)
 
 	for key, value := range data {
-		var ownership = Ownership{key, "", value, 0, 0}
+		var ownership = Ownership{key, "", value, 0}
 
 		res, err := dataBase.Query(fmt.Sprintf("SELECT name FROM stocks WHERE (id = %d)", key))
 		if !checkError(err) {
@@ -202,8 +202,6 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 				return nil, err
 			}
 		}
-
-		ownership.totalCost = ownership.costPerOne * float64(ownership.amount)
 
 		result = append(result, ownership)
 	}

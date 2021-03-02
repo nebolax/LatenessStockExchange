@@ -17,3 +17,14 @@ func TimeToString(time time.Time) string {
 
 	return res
 }
+
+// Check error for null-ness (if there any exception)
+func CheckError(err error) bool{
+	if err != nil {
+		if DebugMode {
+			panic(err)
+		}
+		return false
+	}
+	return true
+}

@@ -11,7 +11,6 @@ import (
 
 // Main function to call all other functions
 func main() {
-	test()
 	database.Init(database.StandartPath)
 	verifier.CheckTest()
 	for i := 0; i < len(pricesmonitor.AllCalculators); i++ {

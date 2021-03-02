@@ -2,6 +2,8 @@ package netcommunicator
 
 import (
 	"fmt"
+	"github.com/nebolax/LatenessStockExcahnge/database"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -176,7 +178,18 @@ func graphStockPage(w http.ResponseWriter, r *http.Request) {
 	w.Write(file)
 }
 
-func regUser(login, pwd string) regStatus {
+func processRegisterError(err error) {
+	fmt.Println(err)
+}
+
+func regUser(login, email, pwd string) regStatus {
+
+	err := database.AddUser(login, email, pwd)
+
+	if !general.CheckError(err) {
+		processRegisterError(err)
+	}
+
 	if _, ok := users[login]; ok {
 		return userExistsRegFail
 	} else {

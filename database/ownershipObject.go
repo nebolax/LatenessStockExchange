@@ -5,5 +5,4 @@ type Ownership struct {
 	name string
 	amount int
 	costPerOne float64
-	totalCost float64
 }
