@@ -3,10 +3,10 @@ package main
 
 import (
 	"github.com/nebolax/LatenessStockExcahnge/database"
-	"github.com/nebolax/LatenessStockExcahnge/verifier"
 	NetComms "github.com/nebolax/LatenessStockExcahnge/netcommunicator"
 	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor"
 	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor/pricescalc"
+	"github.com/nebolax/LatenessStockExcahnge/verifier"
 )
 
 // Main function to call all other functions
