@@ -20,7 +20,7 @@ var tableNameList = [7]string{"users", "stocks", "user_stock_ownerships",
 // Check tables for incompleteness. Returns true if everything is OK.
 func checkTables(db *sql.DB) bool {
 	tables, err := db.Query("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		print("CRINGE!!!\n" + err.Error())
 		return false
 	}
@@ -30,7 +30,7 @@ func checkTables(db *sql.DB) bool {
 	for tables.Next(){
 		var name string
 		err := tables.Scan(&name)
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return false
 		}
 		for index, value := range  tablesNames {
@@ -48,13 +48,13 @@ func checkTables(db *sql.DB) bool {
 func createTables(db *sql.DB) {
 	fmt.Println("Creating new tables")
 	file, err := ioutil.ReadFile("storage\\template.sql")
-	checkError(err)
+	general.CheckError(err)
 
 	requests := strings.Split(string(file), ";")
 
 	for _, request := range requests {
 		_, err := db.Exec(request)
-		checkError(err)
+		general.CheckError(err)
 		//fmt.Println(result)
 	}
 }
@@ -62,7 +62,7 @@ func createTables(db *sql.DB) {
 // Initialization of database. If something is wrong, recreate all database
 func Init(name string) {
 	db, err := sql.Open("sqlite3", name)
-	checkError(err)
+	general.CheckError(err)
 	var dbOk = checkTables(db)
 	if !dbOk {
 		createTables(db)
