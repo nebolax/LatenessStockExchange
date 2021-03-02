@@ -2,17 +2,13 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"testing"
 )
 
 func clearTest() {
-	for _, value := range tableNameList {
-		fmt.Println(value)
-		_, _ = dataBase.Exec("DROP TABLE " + value)
-	}
+	_, _ = dataBase.Exec("DROP TABLE *")
 }
 
 func TestCheckTablesOk(t *testing.T) {
