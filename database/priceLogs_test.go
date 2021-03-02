@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math"
 	"testing"
 )
@@ -19,7 +20,7 @@ func TestUpdatePrice(t *testing.T) {
 
 	value, err := GetLatestPrice(1)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		t.Error("Some error occurred: " + err.Error())
 	}
 

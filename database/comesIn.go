@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"time"
 )
 
@@ -23,7 +24,7 @@ func AddCertification(stockId int, certifierId int, timestamp time.Time) (bool, 
 		"INSERT INTO comes_in (certifier_id, stock_id, timestamp) values (%d, %d, %s)",
 		certifierId, stockId, timestamp.Format(datetimeFormat)))
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return false, time.Time{}, err
 	}
 
@@ -37,7 +38,7 @@ func AddCertification(stockId int, certifierId int, timestamp time.Time) (bool, 
 		"SELECT timestamp FROM comes_in WHERE (timestamp > %s) AND (stock_id = %d)",
 		today.Format(datetimeFormat), stockId))
 
-	if !checkError(cringe) {
+	if !general.CheckError(cringe) {
 		return false, time.Time{}, cringe
 	}
 
@@ -49,7 +50,7 @@ func AddCertification(stockId int, certifierId int, timestamp time.Time) (bool, 
 		var timeStamp time.Time
 		err = result.Scan(&timeStamp)
 
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return false, time.Time{}, err
 		}
 

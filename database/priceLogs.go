@@ -27,7 +27,7 @@ func GetLatestPrice(stockId int) (float64, error) {
 			"(timestamp = (SELECT MAX(timestamp) FROM price_logs WHERE (stock_id = %d))) " +
 			"AND (stock_id = %d)", stockId, stockId))
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return 0, err
 	}
 
@@ -35,7 +35,7 @@ func GetLatestPrice(stockId int) (float64, error) {
 		var value float64
 		err = res.Scan(&value)
 
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return 0, err
 		}
 

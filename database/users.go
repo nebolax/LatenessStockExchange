@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math/rand"
 	"regexp"
 	"time"
@@ -76,7 +77,7 @@ func login(user *sql.Rows, password string) error {
 
 		err := user.Scan(&salt, &passwordHash)
 
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return err
 		}
 
@@ -107,7 +108,7 @@ func LoginByNickname(nickname string, password string) error {
 
 	query, err := dataBase.Query(fmt.Sprintf("SELECT (password_salt, password_hash) FROM users WHERE (username = '%s')", nickname))
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
@@ -124,7 +125,7 @@ func LoginByEmail(email string, password string) error {
 
 	query, err := dataBase.Query(fmt.Sprintf("SELECT (password_salt, password_hash) FROM users WHERE (email = '%s')", email))
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
@@ -141,7 +142,7 @@ func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 	query, err := dataBase.Query(fmt.Sprintf(
 		"SELECT (stock_id, amount) FROM user_stock_ownerships WHERE (user_id = %d)", userId))
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return nil, err
 	}
 
@@ -153,7 +154,7 @@ func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 
 		err = query.Scan(&stockId, &amount)
 
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return nil, err
 		}
 
@@ -167,7 +168,7 @@ func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 // Returns more info about investment portfolio of userId (see Ownership for more information)
 func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 	data, err := GetInvestmentPortfolio(userId)
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return nil, err
 	}
 
@@ -177,28 +178,28 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 		var ownership = Ownership{key, "", value, 0}
 
 		res, err := dataBase.Query(fmt.Sprintf("SELECT name FROM stocks WHERE (id = %d)", key))
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return nil, err
 		}
 
 		if res.Next() {
 			err = res.Scan(&ownership.name)
 
-			if !checkError(err) {
+			if !general.CheckError(err) {
 				return nil, err
 			}
 		}
 
 		res, err = dataBase.Query("SELECT price FROM price_logs WHERE (timestamp = (SELECT MAX(timestamp) FROM price_logs))")
 
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return nil, err
 		}
 
 		if res.Next() {
 			err = res.Scan(&ownership.costPerOne)
 
-			if !checkError(err) {
+			if !general.CheckError(err) {
 				return nil, err
 			}
 		}

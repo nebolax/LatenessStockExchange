@@ -46,8 +46,8 @@ type oneStockInfo struct {
 type regStatus int
 
 const (
-	newUserConfirmed  regStatus = 0
-	userExistsRegFail regStatus = 1
+	newUserConfirmed regStatus = 0
+	userRegFail      regStatus = 1
 )
 
 type loginStatus int
@@ -193,19 +193,22 @@ func regUser(login, email, pwd string) regStatus {
 
 	if !general.CheckError(err) {
 		processRegisterError(err)
+		return userRegFail
 	}
 
-	if _, ok := users[login]; ok {
-		return userExistsRegFail
+	return newUserConfirmed
+
+	/*if _, ok := users[login]; ok {
+		return userRegFail
 	} else {
 		hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 		checkerr(err)
 		users[login] = string(hash)
 		return newUserConfirmed
-	}
+	}*/
 }
 
-func loginUser(login, inpPwd string) loginStatus {
+func loginUser(login, email, inpPwd string) loginStatus {
 	if originPwd, ok := users[login]; !ok {
 		return userUnexistsFail
 	} else {
@@ -242,7 +245,7 @@ func procRegister(w http.ResponseWriter, r *http.Request) {
 	case newUserConfirmed:
 		setUserInfo(w, r, 1, inpLogin)
 		http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
-	case userExistsRegFail:
+	case userRegFail:
 		tmpl, _ := template.ParseFiles("./templates/register.html")
 		tmpl.Execute(w, "User already exists")
 	}

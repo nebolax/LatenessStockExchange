@@ -18,7 +18,7 @@ func TestGetResources(t *testing.T) {
 
 	result, err := getResources(userId, stockId)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		t.Error(err.Error())
 	}
 
@@ -39,7 +39,7 @@ func TestGetGritscoins(t *testing.T) {
 
 	result, err := getGritscoins(userId)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		t.Error(err.Error())
 	}
 
@@ -73,7 +73,7 @@ func TestMakeTransactionFailMoney(t *testing.T) {
 
 	err := MakeTransaction(1, 2, 1, 2, price)
 
-	if checkError(err) {
+	if general.CheckError(err) {
 		t.Error("No error!!!")
 	} else{
 		if err.Error() != "Buyer has not enough money for deal" {
@@ -90,7 +90,7 @@ func TestMakeTransactionFailDBStock(t *testing.T) {
 
 	err := MakeTransaction(1, 2, 179, 2, price)
 
-	if checkError(err) {
+	if general.CheckError(err) {
 		t.Error("No error occurred!!")
 	}
 }
@@ -103,7 +103,7 @@ func TestMakeTransactionFailDBUser(t *testing.T) {
 
 	err := MakeTransaction(179, 2, 1, 2, price)
 
-	if checkError(err) {
+	if general.CheckError(err) {
 		t.Error("No error occurred!!")
 	}
 }
@@ -115,7 +115,7 @@ func TestMakeTransactionFailStocks(t *testing.T) {
 
 	err := MakeTransaction(1, 2, 1, 20, price)
 
-	if checkError(err) {
+	if general.CheckError(err) {
 		t.Error("No error occurred!!")
 	}
 }
@@ -127,7 +127,7 @@ func TestMakeTransactionOk(t *testing.T) {
 	var price = 20.5
 	err := MakeTransaction(1, 2, 1, 2, price)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		t.Error(err.Error())
 	}
 }
@@ -140,7 +140,7 @@ func TestDividends(t *testing.T) {
 
 	err := UpdatePrice(1, price)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		t.Error(err.Error())
 	}
 
@@ -148,13 +148,13 @@ func TestDividends(t *testing.T) {
 
 	err = Dividends(1, percentage)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		t.Error(err.Error())
 	}
 
 	res, err := dataBase.Query("SELECT (money) FROM users WHERE (id = 1)")
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		t.Error(err.Error())
 	}
 

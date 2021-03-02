@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"testing"
 )
 
@@ -15,13 +16,13 @@ func TestErrorConstructor(t *testing.T) {
 }
 
 func TestCheckErrorOk(t *testing.T) {
-	if !checkError(nil) {
+	if !general.CheckError(nil) {
 		t.Error("Exception on non-exception object")
 	}
 }
 
 func TestCheckErrorBad(t *testing.T) {
-	if checkError(DatabaseError{"Test"}) {
+	if general.CheckError(DatabaseError{"Test"}) {
 		t.Error("No exception on exception object")
 	}
 }

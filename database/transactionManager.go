@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"time"
 )
 
@@ -22,7 +23,7 @@ const datetimeFormat = "2000-01-01 11:12:13"
 func getResources(buyerId int, stockId int) (int, error) {
 	count, err := dataBase.Query(fmt.Sprintf(
 		"SELECT amount FROM user_stock_ownerships WHERE (user_id = %d) AND (stock_id = %d)", buyerId, stockId))
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return 0, err
 	}
 
@@ -30,7 +31,7 @@ func getResources(buyerId int, stockId int) (int, error) {
 	for count.Next() {
 		var countInt int
 		err = count.Scan(&countInt)
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return 0, err
 		}
 
@@ -44,14 +45,14 @@ func getResources(buyerId int, stockId int) (int, error) {
 func getGritscoins(userId int) (float64, error) {
 	count, err := dataBase.Query(fmt.Sprintf(
 		"SELECT money FROM users WHERE (id = %d)", userId))
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return 0, err
 	}
 
 	for count.Next() {
 		var amount float64
 		err = count.Scan(&amount)
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return 0, err
 		}
 		return amount, nil
@@ -67,25 +68,25 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 
 	buyerGritscoins, err := getGritscoins(buyerId)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	buyerStocks, err := getResources(buyerId, stockId)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	sellerGritscoins, err := getGritscoins(sellerId)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	sellerStocks, err := getResources(sellerId, stockId)
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
@@ -103,25 +104,25 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 
 	updateSellerStocks := fmt.Sprintf(baseStock, sellerStocks - amount, sellerId, stockId)
 	_, err = dataBase.Exec(updateSellerStocks)
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	updateBuyerCoins := fmt.Sprintf(baseMoney, buyerGritscoins - totalDealPrice, buyerId)
 	_, err = dataBase.Exec(updateBuyerCoins)
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	updateSellerCoins := fmt.Sprintf(baseMoney, sellerGritscoins + totalDealPrice, sellerId)
 	_, err = dataBase.Exec(updateSellerCoins)
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	updateBuyerStocks := fmt.Sprintf(baseStock, buyerStocks + amount, buyerId, stockId)
 	_, err = dataBase.Exec(updateBuyerStocks)
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
@@ -129,13 +130,13 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 		"values (%d, %d, %d, %f, %d, %s)"
 	_, err = dataBase.Exec(fmt.Sprintf(addTransaction, sellerId, stockId, amount,
 		-1 * totalDealPrice, sell, time.Now().Format(datetimeFormat)))
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	_, err = dataBase.Exec(fmt.Sprintf(addTransaction, buyerId, stockId, amount,
 		totalDealPrice, buy, time.Now().Format(datetimeFormat)))
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
@@ -149,20 +150,20 @@ func Dividends(stockId int, percentage float64) error {
 	owners, err := dataBase.Query(fmt.Sprintf(
 		"SELECT (amount, user_id) FROM user_stock_ownerships WHERE (stock_id = %d)", stockId))
 
-	if !checkError(err) {
+	if !general.CheckError(err) {
 		return err
 	}
 
 	price, priceErr := dataBase.Query(fmt.Sprintf(
 		"SELECT price FROM price_logs WHERE (id = %d) ORDER BY timestamp DESC LIMIT 1", stockId))
-	if !checkError(priceErr) {
+	if !general.CheckError(priceErr) {
 		return priceErr
 	}
 
 	var priceData float64
 	if price.Next() {
 		priceErr = price.Scan(&priceData)
-		if !checkError(priceErr) {
+		if !general.CheckError(priceErr) {
 			return priceErr
 		}
 	}
@@ -172,20 +173,20 @@ func Dividends(stockId int, percentage float64) error {
 		var amount int
 
 		err = owners.Scan(&amount, &userId)
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return err
 		}
 
 		countResponse, err := dataBase.Query(fmt.Sprintf(
 			"SELECT money FROM user WHERE (user_id = %d)", userId))
-		if !checkError(err) {
+		if !general.CheckError(err) {
 			return err
 		}
 
 		if countResponse.Next() {
 			var value float64
 			err = countResponse.Scan(&value)
-			if !checkError(err) {
+			if !general.CheckError(err) {
 				return err
 			}
 
@@ -195,7 +196,7 @@ func Dividends(stockId int, percentage float64) error {
 			_, err = dataBase.Exec(fmt.Sprintf(
 				"UPDATE users SET amount = %f WHERE (user_id = %d)", value, userId))
 
-			if !checkError(err) {
+			if !general.CheckError(err) {
 				return err
 			}
 
@@ -204,7 +205,7 @@ func Dividends(stockId int, percentage float64) error {
 				"values (%d, %d, %d, %f, %d, %s)",
 				userId, stockId, amount, -delta, dividends, time.Now().Format(datetimeFormat)))
 
-			if !checkError(err) {
+			if !general.CheckError(err) {
 				return err
 			}
 		} else {
