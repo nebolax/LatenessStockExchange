@@ -160,12 +160,16 @@ func UpdateData(id int, message OutcomingMessage) {
 }
 
 func allStocksObserver(w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.xhtml")
-	var ar []oneStockInfo
-	for _, calc := range pricesmonitor.AllCalculators {
-		ar = append(ar, oneStockInfo{ID: calc.ID, Name: calcsNames[calc.ID], CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
+	if isUserLoggedIn(r) {
+		tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.xhtml")
+		var ar []oneStockInfo
+		for _, calc := range pricesmonitor.AllCalculators {
+			ar = append(ar, oneStockInfo{ID: calc.ID, Name: calcsNames[calc.ID], CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
+		}
+		tmpl.Execute(w, ar)
+	} else {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
-	tmpl.Execute(w, ar)
 }
 
 func graphStockPage(w http.ResponseWriter, r *http.Request) {
@@ -218,7 +222,8 @@ func procRegister(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
-	status := regUser(inpLogin, inpPwd)
+	inpEmail := r.PostForm.Get("email")
+	status := regUser(inpLogin, inpEmail, inpPwd)
 	switch status {
 	case newUserConfirmed:
 		setUserInfo(w, r, 1, inpLogin)
@@ -238,7 +243,8 @@ func procLogin(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
-	status := loginUser(inpLogin, inpPwd)
+	inpEmail := r.PostForm.Get("email")
+	status := loginUser(inpLogin, inpEmail, inpPwd)
 	tmpl, _ := template.ParseFiles("./templates/login.html")
 	switch status {
 	case loginConfirmed:
