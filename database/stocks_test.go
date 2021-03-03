@@ -10,7 +10,7 @@ func TestAddStock(t *testing.T) {
 
 	var source = "testStock"
 
-	err := AddStock("testStock", 0)
+	err := AddStock("testStock", 0, 10)
 
 	if !general.CheckError(err) {
 		t.Error("Some error occurred: " + err.Error())

@@ -135,7 +135,7 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	defer ws.Close()
 
 	if calc := pricesmonitor.CalcByID(id); calc != nil {
-		fmt.Printf("Id: %d, Offs: %d, st: %#v\n", calc.ID, calc.CurHandler.CurOffers, calc.History)
+		//fmt.Printf("Id: %d, Offs: %d, st: %#v\n", calc.ID, calc.CurHandler.CurOffers, calc.History)
 		ws.WriteJSON(graphPageSetup{"setup", calc.History, calc.CurHandler.CurOffers})
 	}
 
@@ -159,7 +159,7 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 				calc.IncOffers(inc)
 			}
 		}
-		fmt.Printf("New message: %s\n", msg.OfferType)
+		//fmt.Printf("New message: %s\n", msg.OfferType)
 	}
 }
 

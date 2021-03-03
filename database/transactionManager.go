@@ -27,6 +27,7 @@ func getResources(buyerId int, stockId int) (int, error) {
 		return 0, err
 	}
 
+	defer count.Close()
 
 	for count.Next() {
 		var countInt int
@@ -48,6 +49,8 @@ func getGritscoins(userId int) (float64, error) {
 	if !general.CheckError(err) {
 		return 0, err
 	}
+
+	defer count.Close()
 
 	for count.Next() {
 		var amount float64
@@ -154,11 +157,15 @@ func Dividends(stockId int, percentage float64) error {
 		return err
 	}
 
+	defer owners.Close()
+
 	price, priceErr := dataBase.Query(fmt.Sprintf(
 		"SELECT price FROM price_logs WHERE (id = %d) ORDER BY timestamp DESC LIMIT 1", stockId))
 	if !general.CheckError(priceErr) {
 		return priceErr
 	}
+
+	defer price.Close()
 
 	var priceData float64
 	if price.Next() {
@@ -179,9 +186,13 @@ func Dividends(stockId int, percentage float64) error {
 
 		countResponse, err := dataBase.Query(fmt.Sprintf(
 			"SELECT money FROM user WHERE (user_id = %d)", userId))
+
+
 		if !general.CheckError(err) {
 			return err
 		}
+
+		defer countResponse.Close()
 
 		if countResponse.Next() {
 			var value float64

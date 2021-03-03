@@ -1,7 +1,6 @@
 package pricescalc
 
 import (
-	"fmt"
 	"github.com/nebolax/LatenessStockExcahnge/database"
 	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math"
@@ -9,7 +8,7 @@ import (
 	"time"
 )
 
-const updateDatabasePeriod = 50
+const updateDatabasePeriod = 10
 
 type stockDataHandler struct {
 	CurStock      float64
@@ -66,16 +65,11 @@ func updatePrices(observer *RTPriceCalculator) {
 		leftTillUpdate--
 
 		if leftTillUpdate == 0 {
-			fmt.Println(observer)
-			fmt.Println("update started")
 
 			leftTillUpdate = updateDatabasePeriod
 			var price = observer.History[len(observer.History) - 1]
-			fmt.Println(price)
 			err := database.UpdatePrice(observer.ID, price)
 			general.CheckError(err)
-
-			fmt.Println("update finished")
 		}
 
 		timer := time.NewTimer(3 * time.Second)

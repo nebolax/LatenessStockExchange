@@ -24,6 +24,9 @@ func checkTables(db *sql.DB) bool {
 		print("CRINGE!!!\n" + err.Error())
 		return false
 	}
+
+	defer tables.Close()
+
 	tablesNames := make([]string, len(tableNameList))
 	copy(tablesNames, tableNameList[:])
 
@@ -69,6 +72,6 @@ func Init(path string) {
 	}
 
 	initialized = true
-	dataBase = db
+	dataBase = Database{db: db}
 }
 
