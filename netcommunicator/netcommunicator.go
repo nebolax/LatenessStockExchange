@@ -2,14 +2,15 @@ package netcommunicator
 
 import (
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/database"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
 	"strconv"
+
+	"github.com/nebolax/LatenessStockExcahnge/database"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -206,12 +207,12 @@ func regUser(login, email, pwd string) (int, regStatus) {
 
 	id, err := database.AddUser(login, email, pwd)
 
-	 if !general.CheckError(err) {
-	 	processRegisterError(err)
-	 	return 0, userRegFail
-	 }
+	if !general.CheckError(err) {
+		processRegisterError(err)
+		return 0, userRegFail
+	}
 
-	 return id, newUserConfirmed
+	return id, newUserConfirmed
 
 	/*if _, ok := users[login]; ok {
 		return userRegFail
@@ -238,7 +239,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
-func showError(w http.ResponseWriter, r *http.Request, err error){
+func showError(w http.ResponseWriter, r *http.Request, err error) {
 	tmpl, _ := template.ParseFiles("./templates/error.html")
 	tmpl.Execute(w, err)
 }
@@ -246,13 +247,14 @@ func showError(w http.ResponseWriter, r *http.Request, err error){
 func portfolio(w http.ResponseWriter, r *http.Request) {
 	if isUserLoggedIn(r) {
 		userInfo, err := getUserInfo(r)
-
 		if !general.CheckError(err) {
 			showError(w, r, err)
 			return
 		}
 
-		tmpl, _ := template.ParseFiles("./templates/portfolio.html")
+		fmt.Println("ok")
+		tmpl, err := template.ParseFiles("./templates/portfolio.html")
+		checkerr(err)
 		tmpl.Execute(w, userInfo)
 	} else {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -304,6 +306,10 @@ func getLoginHTML(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, "")
 }
 
+func landingPage(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
+}
+
 //StartServer is func
 func StartServer() {
 	router := mux.NewRouter().StrictSlash(true)
@@ -319,6 +325,7 @@ func StartServer() {
 	router.HandleFunc("/register", procRegister).Methods("POST")
 	router.HandleFunc("/register", getRegisterHTML).Methods("GET")
 	router.HandleFunc("/logout", logout).Methods("POST")
+	router.HandleFunc("/", landingPage)
 
 	router.HandleFunc("/ws/graph{id:[0-9]+}", handleConnections)
 	http.Handle("/", router)
