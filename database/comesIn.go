@@ -58,7 +58,7 @@ func AddCertification(stockId int, certifierId int, timestamp time.Time) (bool, 
 		count++
 	}
 
-	// If it is exactly (no less - not enough, no more - already registered) needed amount of certifications
+	// If it is exactly (no less - not enough, no more - already registered) needed Amount of certifications
 	if count == certificationsBoundary {
 		totalTime = totalTime / int64(count)
 		realTimestamp := time.Unix(0, totalTime * int64(time.Millisecond))

@@ -10,6 +10,22 @@
 
 <body>
     <p>Your portfolio</p>
+    <p>{{ .Nickname }}</p>
+    <p>Email: {{ .Email }}</p>
+    <p>Грицкоины: {{ .Money }}</p>
+
+    <ul>
+        {{ range .Stocks }}
+            <li>
+                <p><a href="./graph{{ .StockId }}"><b>{{ .Name }}</b></a></p>
+                <br>
+                <p>{{ .Amount }} шт.</p>
+                <br>
+                <p>По цене {{ .CostPerOne }} за штуку</p>
+            </li>
+        {{ end }}
+    </ul>
+
     <p><a href="/allstocks">Visit all stocks page</a></p>
     <form method="POST" action="/logout">
         <button type="submit">Log out</button>

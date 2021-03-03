@@ -2,6 +2,7 @@ package netcommunicator
 
 import (
 	"fmt"
+	"github.com/nebolax/LatenessStockExcahnge/database/models"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -82,6 +83,23 @@ var (
 		9: "Nastya Ch",
 	}
 )
+
+func getUserInfo(r *http.Request) *models.User {
+	session, _ := store.Get(r, "user-info")
+	id, ok := session.Values["userid"].(int)
+
+	if !ok || id == 0 {
+		return nil
+	}
+
+	result, err := database.GetUser(id)
+
+	if !general.CheckError(err) {
+		return nil
+	}
+
+	return result
+}
 
 func isUserLoggedIn(r *http.Request) bool {
 	session, _ := store.Get(r, "user-info")
@@ -230,10 +248,22 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
+func showError(w http.ResponseWriter, r *http.Request, err NetError){
+	tmpl, _ := template.ParseFiles("./templates/error.html")
+	tmpl.Execute(w, err)
+}
+
 func portfolio(w http.ResponseWriter, r *http.Request) {
 	if isUserLoggedIn(r) {
+		userInfo := getUserInfo(r)
+
+		if userInfo == nil {
+			showError(w, r, NetError{"User not found!"})
+			return
+		}
+
 		tmpl, _ := template.ParseFiles("./templates/portfolio.html")
-		tmpl.Execute(w, "")
+		tmpl.Execute(w, userInfo)
 	} else {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}

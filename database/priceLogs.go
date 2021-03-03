@@ -41,6 +41,6 @@ func GetLatestPrice(stockId int) (float64, error) {
 
 		return value, nil
 	} else {
-		return 0, DatabaseError{"There are no records about such stockId"}
+		return 0, DatabaseError{"There are no records about such StockId"}
 	}
 }

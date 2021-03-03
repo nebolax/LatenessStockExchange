@@ -1,8 +1,8 @@
 package database
 
 type Ownership struct {
-	stockId int
-	name string
-	amount int
-	costPerOne float64
+	StockId    int
+	Name       string
+	Amount     int
+	CostPerOne float64
 }

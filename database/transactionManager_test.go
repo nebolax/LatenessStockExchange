@@ -13,7 +13,7 @@ func TestGetResources(t *testing.T) {
 	stockId := 234
 	amount := 222
 	_, _ = dataBase.Exec(fmt.Sprintf(
-		"INSERT INTO user_stock_ownerships (user_id, stock_id, amount) " +
+		"INSERT INTO user_stock_ownerships (user_id, stock_id, Amount) " +
 			"values (%d, %d, %d)", userId, stockId, amount))
 
 	result, err := getResources(userId, stockId)
@@ -61,7 +61,7 @@ func prepareForTestMakeTransaction(){
 
 
 	_, _ = dataBase.Exec(
-		"INSERT INTO user_stock_ownerships (user_id, stock_id, amount) values (1, 1, 10)")
+		"INSERT INTO user_stock_ownerships (user_id, stock_id, Amount) values (1, 1, 10)")
 }
 
 

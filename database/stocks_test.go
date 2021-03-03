@@ -17,7 +17,7 @@ func TestAddStock(t *testing.T) {
 		t.Error("Some error occurred: " + err.Error())
 	}
 
-	res, err := dataBase.Query("SELECT name FROM stocks")
+	res, err := dataBase.Query("SELECT Name FROM stocks")
 
 	if !general.CheckError(err) {
 		t.Error("Some error occurred: " + err.Error())
