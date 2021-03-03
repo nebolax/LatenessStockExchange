@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math"
 	"testing"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 func TestGetResources(t *testing.T) {
 	defer clearTest()
-	Init(testPath)
 	userId := 123
 	stockId := 234
 	amount := 222
@@ -29,7 +29,6 @@ func TestGetResources(t *testing.T) {
 
 func TestGetGritscoins(t *testing.T) {
 	defer clearTest()
-	Init(testPath)
 	userId := 123
 	amount := 222.333
 	_, _ = dataBase.Exec(fmt.Sprintf(
@@ -49,7 +48,6 @@ func TestGetGritscoins(t *testing.T) {
 }
 
 func prepareForTestMakeTransaction(){
-	Init(testPath)
 
 	_, _ = dataBase.Exec("INSERT INTO users " +
 		"(id, username, email, password_hash, password_salt, money) " +
@@ -152,7 +150,7 @@ func TestDividends(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	res, err := dataBase.Query("SELECT (money) FROM users WHERE (id = 1)")
+	res, err := dataBase.Query("SELECT money FROM users WHERE (id = 1)")
 
 	if !general.CheckError(err) {
 		t.Error(err.Error())

@@ -7,7 +7,6 @@ import (
 
 func TestAddStock(t *testing.T) {
 	defer clearTest()
-	Init(testPath)
 
 	var source = "testStock"
 

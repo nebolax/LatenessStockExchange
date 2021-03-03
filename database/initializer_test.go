@@ -8,7 +8,7 @@ import (
 )
 
 func clearTest() {
-	_, _ = dataBase.Exec("DROP TABLE *")
+	//_, _ = dataBase.Exec("DELETE FROM *")
 }
 
 func TestCheckTablesOk(t *testing.T) {
@@ -28,9 +28,11 @@ func TestCheckTablesOk(t *testing.T) {
 
 func TestCheckTablesBad(t *testing.T) {
 	_, _ = os.Create("test.sqlite")
-	defer os.Remove("test.sqlite")
 
 	db, err := sql.Open("sqlite3", "test.sqlite")
+
+	//defer db.Close()
+	//defer os.Remove("test.sqlite")
 
 	if err != nil {
 		t.Error(err.Error())
@@ -43,9 +45,12 @@ func TestCheckTablesBad(t *testing.T) {
 
 func TestCreateTables(t *testing.T) {
 	_, _ = os.Create("test.sqlite")
-	defer os.Remove("test.sqlite")
 
 	db, err := sql.Open("sqlite3", "test.sqlite")
+
+	//defer db.Close()
+	//defer os.Remove("test.sqlite")
+
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -57,8 +62,10 @@ func TestCreateTables(t *testing.T) {
 	}
 }
 
-func TestInit(t *testing.T) {
-	Init(testPath)
+/*func TestInit(t *testing.T) {
+	Init("test.sqlite")
+	defer clearTest()
+	defer dataBase.Close()
 
 	if !initialized {
 		t.Error("DB is not initialized after Init()")
@@ -67,4 +74,4 @@ func TestInit(t *testing.T) {
 	if !checkTables(dataBase) {
 		t.Error("DB is not OK after Init()")
 	}
-}
+}*/

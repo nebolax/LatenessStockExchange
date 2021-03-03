@@ -2,7 +2,6 @@ package netcommunicator
 
 import (
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/database/models"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -80,7 +79,7 @@ var (
 	}
 )
 
-func getUserInfo(r *http.Request) *models.User {
+func getUserInfo(r *http.Request) *database.User {
 	session, _ := store.Get(r, "user-info")
 	id, ok := session.Values["userid"].(int)
 

@@ -148,7 +148,7 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 // Gives percentage (1.0 = 100%) of cost of stock to every owner for one stock
 func Dividends(stockId int, percentage float64) error {
 	owners, err := dataBase.Query(fmt.Sprintf(
-		"SELECT (Amount, user_id) FROM user_stock_ownerships WHERE (stock_id = %d)", stockId))
+		"SELECT amount, user_id FROM user_stock_ownerships WHERE (stock_id = %d)", stockId))
 
 	if !general.CheckError(err) {
 		return err

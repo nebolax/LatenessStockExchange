@@ -8,7 +8,6 @@ import (
 
 func TestUpdatePrice(t *testing.T) {
 	defer clearTest()
-	Init(testPath)
 
 	var data = 179.179
 

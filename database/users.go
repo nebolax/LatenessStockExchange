@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/database/models"
 	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math/rand"
 	"regexp"
@@ -107,7 +106,7 @@ func LoginByNickname(nickname string, password string) error {
 		return DatabaseError{"Database is not initialized"}
 	}
 
-	query, err := dataBase.Query(fmt.Sprintf("SELECT (password_salt, password_hash) FROM users WHERE (username = '%s')", nickname))
+	query, err := dataBase.Query(fmt.Sprintf("SELECT password_salt, password_hash FROM users WHERE (username = '%s')", nickname))
 
 	if !general.CheckError(err) {
 		return err
@@ -124,7 +123,7 @@ func LoginByEmail(email string, password string) error {
 		return DatabaseError{"Database is not initialized"}
 	}
 
-	query, err := dataBase.Query(fmt.Sprintf("SELECT (password_salt, password_hash) FROM users WHERE (email = '%s')", email))
+	query, err := dataBase.Query(fmt.Sprintf("SELECT password_salt, password_hash FROM users WHERE (email = '%s')", email))
 
 	if !general.CheckError(err) {
 		return err
@@ -141,7 +140,7 @@ func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 	}
 
 	query, err := dataBase.Query(fmt.Sprintf(
-		"SELECT (stock_id, Amount) FROM user_stock_ownerships WHERE (user_id = %d)", userId))
+		"SELECT stock_id, amount FROM user_stock_ownerships WHERE (user_id = %d)", userId))
 
 	if !general.CheckError(err) {
 		return nil, err
@@ -211,18 +210,18 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 	return result, nil
 }
 
-func GetUser(id int) (*models.User, error) {
+func GetUser(id int) (*User, error) {
 	if !initialized {
 		return nil, DatabaseError{"Database is not initialized"}
 	}
 
-	rows, err := dataBase.Query(fmt.Sprintf("SELECT (username, email, money) FROM users WHERE (id = '%d')", id))
+	rows, err := dataBase.Query(fmt.Sprintf("SELECT username, email, money FROM users WHERE (id = '%d')", id))
 	if !general.CheckError(err) {
 		return nil, err
 	}
 
 	if rows.Next() {
-		var result models.User = models.User{}
+		var result User = User{}
 		result.Id = id
 		err = rows.Scan(&result.Nickname, &result.Email, &result.Money)
 
