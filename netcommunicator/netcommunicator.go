@@ -251,13 +251,14 @@ func showError(w http.ResponseWriter, r *http.Request, err error) {
 func portfolio(w http.ResponseWriter, r *http.Request) {
 	if isUserLoggedIn(r) {
 		userInfo, err := getUserInfo(r)
-
 		if !general.CheckError(err) {
 			showError(w, r, err)
 			return
 		}
 
-		tmpl, _ := template.ParseFiles("./templates/portfolio.html")
+		fmt.Println("ok")
+		tmpl, err := template.ParseFiles("./templates/portfolio.html")
+		checkerr(err)
 		tmpl.Execute(w, userInfo)
 	} else {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
