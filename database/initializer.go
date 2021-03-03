@@ -19,7 +19,7 @@ var tableNameList = [7]string{"users", "stocks", "user_stock_ownerships",
 
 // Check tables for incompleteness. Returns true if everything is OK.
 func checkTables(db *sql.DB) bool {
-	tables, err := db.Query("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
+	tables, err := db.Query("SELECT Name FROM sqlite_master WHERE type ='table' AND Name NOT LIKE 'sqlite_%';")
 	if !general.CheckError(err) {
 		print("CRINGE!!!\n" + err.Error())
 		return false

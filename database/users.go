@@ -133,7 +133,7 @@ func LoginByEmail(email string, password string) error {
 	return login(query, password)
 }
 
-// Returns map from stockId to amount - ownerships of userId
+// Returns map from StockId to Amount - ownerships of userId
 // If error occurred, returns nil as map and error as second object
 func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 	if !initialized {
@@ -141,7 +141,7 @@ func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 	}
 
 	query, err := dataBase.Query(fmt.Sprintf(
-		"SELECT (stock_id, amount) FROM user_stock_ownerships WHERE (user_id = %d)", userId))
+		"SELECT (stock_id, Amount) FROM user_stock_ownerships WHERE (user_id = %d)", userId))
 
 	if !general.CheckError(err) {
 		return nil, err
@@ -178,13 +178,13 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 	for key, value := range data {
 		var ownership = Ownership{key, "", value, 0}
 
-		res, err := dataBase.Query(fmt.Sprintf("SELECT name FROM stocks WHERE (id = %d)", key))
+		res, err := dataBase.Query(fmt.Sprintf("SELECT Name FROM stocks WHERE (id = %d)", key))
 		if !general.CheckError(err) {
 			return nil, err
 		}
 
 		if res.Next() {
-			err = res.Scan(&ownership.name)
+			err = res.Scan(&ownership.Name)
 
 			if !general.CheckError(err) {
 				return nil, err
@@ -198,7 +198,7 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 		}
 
 		if res.Next() {
-			err = res.Scan(&ownership.costPerOne)
+			err = res.Scan(&ownership.CostPerOne)
 
 			if !general.CheckError(err) {
 				return nil, err
@@ -211,6 +211,33 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 	return result, nil
 }
 
-func GetUser(nickname string) (models.User, error) {
+func GetUser(id int) (*models.User, error) {
+	if !initialized {
+		return nil, DatabaseError{"Database is not initialized"}
+	}
 
+	rows, err := dataBase.Query(fmt.Sprintf("SELECT (username, email, money) FROM users WHERE (id = '%d')", id))
+	if !general.CheckError(err) {
+		return nil, err
+	}
+
+	if rows.Next() {
+		var result models.User = models.User{}
+		result.Id = id
+		err = rows.Scan(&result.Nickname, &result.Email, &result.Money)
+
+		if !general.CheckError(err) {
+			return nil, err
+		}
+
+		result.Stocks, err = GetInvestmentPortfolioPretty(result.Id)
+
+		if !general.CheckError(err) {
+			return nil, err
+		}
+
+		return &result, nil
+	}
+
+	return nil, DatabaseError{"No such user!"}
 }

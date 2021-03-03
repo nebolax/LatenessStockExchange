@@ -19,10 +19,10 @@ const (
 // A datetime format for database storage
 const datetimeFormat = "2000-01-01 11:12:13"
 
-// Count amount of stockId stock owned by buyerId
+// Count Amount of StockId stock owned by buyerId
 func getResources(buyerId int, stockId int) (int, error) {
 	count, err := dataBase.Query(fmt.Sprintf(
-		"SELECT amount FROM user_stock_ownerships WHERE (user_id = %d) AND (stock_id = %d)", buyerId, stockId))
+		"SELECT Amount FROM user_stock_ownerships WHERE (user_id = %d) AND (stock_id = %d)", buyerId, stockId))
 	if !general.CheckError(err) {
 		return 0, err
 	}
@@ -62,7 +62,7 @@ func getGritscoins(userId int) (float64, error) {
 }
 
 // Makes transaction between sellerId and buyerId, where
-// sellerId sells amount of stockId stocks to buyerId
+// sellerId sells Amount of StockId stocks to buyerId
 func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, currentPrice float64) error {
 	totalDealPrice := currentPrice * float64(amount)
 
@@ -98,7 +98,7 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 		return DatabaseError{"Seller has not enough stocks for deal"}
 	}
 
-	baseStock := "UPDATE user_stock_ownerships SET amount = %d WHERE (user_id = %d) AND (stock_id = %d)"
+	baseStock := "UPDATE user_stock_ownerships SET Amount = %d WHERE (user_id = %d) AND (stock_id = %d)"
 
 	baseMoney := "UPDATE users SET money = %f WHERE (user_id = %d)"
 
@@ -126,7 +126,7 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 		return err
 	}
 
-	addTransaction := "INSERT INTO transaction_logs (user_id, stock_id, amount, money_spent, type, timestamp) " +
+	addTransaction := "INSERT INTO transaction_logs (user_id, stock_id, Amount, money_spent, type, timestamp) " +
 		"values (%d, %d, %d, %f, %d, %s)"
 	_, err = dataBase.Exec(fmt.Sprintf(addTransaction, sellerId, stockId, amount,
 		-1 * totalDealPrice, sell, time.Now().Format(datetimeFormat)))
@@ -144,11 +144,11 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 
 }
 
-// Gives dividends to all stockId owners
+// Gives dividends to all StockId owners
 // Gives percentage (1.0 = 100%) of cost of stock to every owner for one stock
 func Dividends(stockId int, percentage float64) error {
 	owners, err := dataBase.Query(fmt.Sprintf(
-		"SELECT (amount, user_id) FROM user_stock_ownerships WHERE (stock_id = %d)", stockId))
+		"SELECT (Amount, user_id) FROM user_stock_ownerships WHERE (stock_id = %d)", stockId))
 
 	if !general.CheckError(err) {
 		return err
@@ -194,14 +194,14 @@ func Dividends(stockId int, percentage float64) error {
 			value += delta
 
 			_, err = dataBase.Exec(fmt.Sprintf(
-				"UPDATE users SET amount = %f WHERE (user_id = %d)", value, userId))
+				"UPDATE users SET Amount = %f WHERE (user_id = %d)", value, userId))
 
 			if !general.CheckError(err) {
 				return err
 			}
 
 			_, err = dataBase.Exec(fmt.Sprintf(
-				"INSERT INTO transaction_logs (user_id, stock_id, amount, money_spent, type, timestamp) " +
+				"INSERT INTO transaction_logs (user_id, stock_id, Amount, money_spent, type, timestamp) " +
 				"values (%d, %d, %d, %f, %d, %s)",
 				userId, stockId, amount, -delta, dividends, time.Now().Format(datetimeFormat)))
 
