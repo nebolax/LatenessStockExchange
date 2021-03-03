@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-const StandartPath = "database\\storage\\database.sqlite"
-const testPath = "storage\\test.sqlite"
+const StandartPath = "database\\storage\\"
+const testPath = "storage\\"
 
 
 // List of names of database tables. It is used to check if database is incomplete
@@ -45,9 +45,9 @@ func checkTables(db *sql.DB) bool {
 }
 
 // Generate tables from start (if smth is wrong)
-func createTables(db *sql.DB) {
+func createTables(db *sql.DB, path string) {
 	fmt.Println("Creating new tables")
-	file, err := ioutil.ReadFile("storage\\template.sql")
+	file, err := ioutil.ReadFile(path + "template.sql")
 	general.CheckError(err)
 
 	requests := strings.Split(string(file), ";")
@@ -60,12 +60,12 @@ func createTables(db *sql.DB) {
 }
 
 // Initialization of database. If something is wrong, recreate all database
-func Init(name string) {
-	db, err := sql.Open("sqlite3", name)
+func Init(path string) {
+	db, err := sql.Open("sqlite3", path + "database.db")
 	general.CheckError(err)
 	var dbOk = checkTables(db)
 	if !dbOk {
-		createTables(db)
+		createTables(db, path)
 	}
 
 	initialized = true

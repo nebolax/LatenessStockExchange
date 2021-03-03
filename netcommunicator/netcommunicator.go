@@ -11,8 +11,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/gorilla/websocket"
@@ -83,21 +81,21 @@ var (
 	}
 )
 
-func getUserInfo(r *http.Request) *database.User {
+func getUserInfo(r *http.Request) (*database.User, error) {
 	session, _ := store.Get(r, "user-info")
 	id, ok := session.Values["userid"].(int)
 
 	if !ok || id == 0 {
-		return nil
+		return nil, NetError{"User is not logged in"}
 	}
 
 	result, err := database.GetUser(id)
 
 	if !general.CheckError(err) {
-		return nil
+		return nil, err
 	}
 
-	return result
+	return result, nil
 }
 
 func isUserLoggedIn(r *http.Request) bool {
@@ -208,34 +206,34 @@ func processRegisterError(err error) {
 	fmt.Println(err)
 }
 
-func regUser(login, email, pwd string) regStatus {
+func regUser(login, email, pwd string) (int, regStatus) {
 
-	//err := database.AddUser(login, email, pwd)
+	id, err := database.AddUser(login, email, pwd)
 
-	// if !general.CheckError(err) {
-	// 	processRegisterError(err)
-	// 	return userRegFail
-	// }
+	 if !general.CheckError(err) {
+	 	processRegisterError(err)
+	 	return 0, userRegFail
+	 }
 
-	// return newUserConfirmed
+	 return id, newUserConfirmed
 
-	if _, ok := users[login]; ok {
+	/*if _, ok := users[login]; ok {
 		return userRegFail
 	} else {
 		hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 		checkerr(err)
 		users[login] = string(hash)
 		return newUserConfirmed
-	}
+	}*/
 }
 
-func loginUser(login, inpPwd string) loginStatus {
-	err := database.LoginByNickname(login, inpPwd)
+func loginUser(login, inpPwd string) (int, loginStatus) {
+	id, err := database.LoginByNickname(login, inpPwd)
 
 	if !general.CheckError(err) {
-		return loginStatus(err.Error())
+		return 0, loginStatus(err.Error())
 	} else {
-		return LoginOK
+		return id, LoginOK
 	}
 }
 
@@ -244,17 +242,17 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
-func showError(w http.ResponseWriter, r *http.Request, err NetError){
+func showError(w http.ResponseWriter, r *http.Request, err error){
 	tmpl, _ := template.ParseFiles("./templates/error.html")
 	tmpl.Execute(w, err)
 }
 
 func portfolio(w http.ResponseWriter, r *http.Request) {
 	if isUserLoggedIn(r) {
-		userInfo := getUserInfo(r)
+		userInfo, err := getUserInfo(r)
 
-		if userInfo == nil {
-			showError(w, r, NetError{"User not found!"})
+		if !general.CheckError(err) {
+			showError(w, r, err)
 			return
 		}
 
@@ -270,10 +268,10 @@ func procRegister(w http.ResponseWriter, r *http.Request) {
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
 	inpEmail := r.PostForm.Get("email")
-	status := regUser(inpLogin, inpEmail, inpPwd)
+	id, status := regUser(inpLogin, inpEmail, inpPwd)
 	switch status {
 	case newUserConfirmed:
-		setUserInfo(w, r, 1, inpLogin)
+		setUserInfo(w, r, id, inpLogin)
 		http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
 	case userRegFail:
 		tmpl, _ := template.ParseFiles("./templates/register.html")
@@ -291,12 +289,12 @@ func procLogin(w http.ResponseWriter, r *http.Request) {
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
 	//inpEmail := r.PostForm.Get("email")
-	status := loginUser(inpLogin, inpPwd)
+	id, status := loginUser(inpLogin, inpPwd)
 	//user = user
 	tmpl, _ := template.ParseFiles("./templates/login.html")
 	switch status {
 	case LoginOK:
-		setUserInfo(w, r, 1, inpLogin)
+		setUserInfo(w, r, id, inpLogin)
 		http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
 	case UserUnexists:
 		tmpl.Execute(w, "user does not exist")

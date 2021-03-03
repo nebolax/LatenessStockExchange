@@ -2,6 +2,7 @@
 package main
 
 import (
+	"github.com/nebolax/LatenessStockExcahnge/database"
 	NetComms "github.com/nebolax/LatenessStockExcahnge/netcommunicator"
 	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor"
 	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor/pricescalc"
@@ -9,6 +10,7 @@ import (
 
 // Main function to call all other functions
 func main() {
+	database.Init(database.StandartPath)
 	for i := 0; i < len(pricesmonitor.AllCalculators); i++ {
 		procNewData(pricesmonitor.AllCalculators[i])
 	}

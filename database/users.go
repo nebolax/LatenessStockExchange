@@ -41,14 +41,14 @@ func randomString(length int) string {
 
 // Some email checking function (mb it's better to make it more intellectual)
 func checkEmail(email string) bool {
-	var template = regexp.MustCompile("[*]+@179.ru")
+	var template = regexp.MustCompile("[[:alpha:]]+@179.ru")
 	return template.Match([]byte(email))
 }
 
 // Adds user with given email and password and nickname to batadase
-func AddUser(nickname string, email string, password string) error{
+func AddUser(nickname string, email string, password string) (int, error) {
 	if !checkEmail(email) {
-		return DatabaseError{"Email address is incorrect!"}
+		return 0, DatabaseError{"Email address is incorrect!"}
 	}
 
 	salt := randomString(saltLength)
@@ -58,27 +58,45 @@ func AddUser(nickname string, email string, password string) error{
 	hash := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
 	if !initialized {
-		return DatabaseError{"Database is not initialized yet!"}
+		return 0, DatabaseError{"Database is not initialized yet!"}
 	}
 
 	_, err := dataBase.Exec(fmt.Sprintf(
 		"INSERT INTO users (username, email, password_hash, password_salt, money) values ('%s', '%s', '%s', '%s', 0);",
 		nickname, email, hash, salt))
 
-	return err
+	if !general.CheckError(err) {
+		return 0, err
+	}
+
+	result, err := dataBase.Query(fmt.Sprintf("SELECT id FROM users WHERE (username = '%s')", nickname))
+
+	if !general.CheckError(err) {
+		return 0, err
+	}
+
+	if result.Next() {
+		var id int
+		err = result.Scan(&id)
+
+		return id, err
+	}
+
+	return 0, DatabaseError{"Some cringy cringe - there is no user with just created nickname"}
 }
 
 // Tries to login user from sql query using given password. Returns error if something went wrong
 // Returns nil if everything is OK
-func login(user *sql.Rows, password string) error {
+func login(user *sql.Rows, password string) (int, error) {
 	if user.Next() {
 		var salt string
 		var passwordHash string
+		var id int
 
-		err := user.Scan(&salt, &passwordHash)
+		err := user.Scan(&salt, &passwordHash, &id)
 
 		if !general.CheckError(err) {
-			return err
+			return 0, err
 		}
 
 		resultString := password + hashKey + salt
@@ -88,28 +106,28 @@ func login(user *sql.Rows, password string) error {
 		hash := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
 		if hash != passwordHash {
-			return DatabaseError{"Password does not match!"}
+			return 0, DatabaseError{"Password does not match!"}
 		} else {
-			return nil
+			return id, nil
 		}
 
 	} else {
-		return DatabaseError{"There is no such user"}
+		return 0, DatabaseError{"There is no such user"}
 	}
 }
 
 // Tries to login user with given nickname by given password
 // Returns error if something went wrong
 // Returns nil if everything is OK
-func LoginByNickname(nickname string, password string) error {
+func LoginByNickname(nickname string, password string) (int, error) {
 	if !initialized {
-		return DatabaseError{"Database is not initialized"}
+		return 0, DatabaseError{"Database is not initialized"}
 	}
 
-	query, err := dataBase.Query(fmt.Sprintf("SELECT password_salt, password_hash FROM users WHERE (username = '%s')", nickname))
+	query, err := dataBase.Query(fmt.Sprintf("SELECT password_salt, password_hash, id FROM users WHERE (username = '%s')", nickname))
 
 	if !general.CheckError(err) {
-		return err
+		return 0, err
 	}
 
 	return login(query, password)
@@ -118,15 +136,16 @@ func LoginByNickname(nickname string, password string) error {
 // Tries to login user with given email by given password
 // Returns error if something went wrong
 // Returns nil if everything is OK
-func LoginByEmail(email string, password string) error {
+func LoginByEmail(email string, password string) (int, error) {
 	if !initialized {
-		return DatabaseError{"Database is not initialized"}
+		return 0, DatabaseError{"Database is not initialized"}
 	}
 
-	query, err := dataBase.Query(fmt.Sprintf("SELECT password_salt, password_hash FROM users WHERE (email = '%s')", email))
+	query, err := dataBase.Query(fmt.Sprintf(
+		"SELECT password_salt, password_hash FROM users WHERE (email = '%s')", email))
 
 	if !general.CheckError(err) {
-		return err
+		return 0, err
 	}
 
 	return login(query, password)
