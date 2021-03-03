@@ -9,8 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/nebolax/LatenessStockExcahnge/database"
-	"github.com/nebolax/LatenessStockExcahnge/general"
+	"github.com/nebolax/LatenessStockExcahnge/database/models"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -50,12 +49,17 @@ const (
 	userRegFail      regStatus = 1
 )
 
-type loginStatus int
+type loginStatus string
 
 const (
-	loginConfirmed        loginStatus = 0
-	userUnexistsFail      loginStatus = 1
-	incorrectPasswordFail loginStatus = 2
+	//LoginOK is OK status
+	LoginOK loginStatus = "Registration successfull"
+
+	//UserUnexists fails when user with such nickname isn't registered
+	UserUnexists loginStatus = "User with such login doesn't exists"
+
+	//IncorrectPassword is thrown when password doesn't match the pwd in database
+	IncorrectPassword loginStatus = "Incorrect password"
 )
 
 var (
@@ -164,7 +168,7 @@ func UpdateData(id int, message OutcomingMessage) {
 
 func allStocksObserver(w http.ResponseWriter, r *http.Request) {
 	if isUserLoggedIn(r) {
-		tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.xhtml")
+		tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.html")
 		var ar []oneStockInfo
 		for _, calc := range pricesmonitor.AllCalculators {
 			ar = append(ar, oneStockInfo{ID: calc.ID, Name: calcsNames[calc.ID], CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
@@ -189,34 +193,34 @@ func processRegisterError(err error) {
 
 func regUser(login, email, pwd string) regStatus {
 
-	err := database.AddUser(login, email, pwd)
+	//err := database.AddUser(login, email, pwd)
 
-	if !general.CheckError(err) {
-		processRegisterError(err)
-		return userRegFail
-	}
+	// if !general.CheckError(err) {
+	// 	processRegisterError(err)
+	// 	return userRegFail
+	// }
 
-	return newUserConfirmed
+	// return newUserConfirmed
 
-	/*if _, ok := users[login]; ok {
+	if _, ok := users[login]; ok {
 		return userRegFail
 	} else {
 		hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 		checkerr(err)
 		users[login] = string(hash)
 		return newUserConfirmed
-	}*/
+	}
 }
 
-func loginUser(login, email, inpPwd string) loginStatus {
+func loginUser(login, email, inpPwd string) (models.User, loginStatus) {
 	if originPwd, ok := users[login]; !ok {
-		return userUnexistsFail
+		return models.User{}, UserUnexists
 	} else {
 		err := bcrypt.CompareHashAndPassword([]byte(originPwd), []byte(inpPwd))
 		if err != nil {
-			return incorrectPasswordFail
+			return models.User{}, IncorrectPassword
 		} else {
-			return loginConfirmed
+			return models.User{}, LoginOK
 		}
 	}
 }
@@ -261,15 +265,16 @@ func procLogin(w http.ResponseWriter, r *http.Request) {
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
 	inpEmail := r.PostForm.Get("email")
-	status := loginUser(inpLogin, inpEmail, inpPwd)
+	user, status := loginUser(inpLogin, inpEmail, inpPwd)
+	user = user
 	tmpl, _ := template.ParseFiles("./templates/login.html")
 	switch status {
-	case loginConfirmed:
+	case LoginOK:
 		setUserInfo(w, r, 1, inpLogin)
 		http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
-	case userUnexistsFail:
+	case UserUnexists:
 		tmpl.Execute(w, "user does not exist")
-	case incorrectPasswordFail:
+	case IncorrectPassword:
 		tmpl.Execute(w, "incorrect password")
 	}
 }
