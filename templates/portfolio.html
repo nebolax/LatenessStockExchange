@@ -7,20 +7,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/portfolio.css">
+    <link rel="stylesheet" href="/static/navbar-style.css">
     <title>Document</title>
 </head>
 
 <body>
     <nav class="navbar navbar-light navbar-expand-md navigation-clean-search">
-        <div class="container"><a class="navbar-brand" href="/">Lateness SE</a><span><strong>nebolax</strong></span><button data-toggle="collapse" data-target="#navcol-1" class="navbar-toggler"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+        <div class="container"><a class="navbar-brand" href="/">Lateness SE</a>
+            <span><strong>{{ .Nickname }}</strong></span>
+            <button data-toggle="collapse" data-target="#navcol-1" class="navbar-toggler"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navcol-1">
                 <ul class="nav navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#"></a>
+                        <p class="nav-link">Email: {{ .Email }}</p>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="/portfolio">Portfolio</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/allstocks">All stocks</a></li>
-                    <li>
+                    <li class="nav-item ">
+                        <a class="nav-link active px-0" href="/portfolio">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav" href="/allstocks">All stocks</a>
+                    </li>
+                    <li class="nav-item">
                         <form method="POST" action="/logout">
                             <button class="btn btn-outline-secondary" type="submit">Log out</button>
                         </form>
