@@ -229,16 +229,13 @@ func regUser(login, email, pwd string) regStatus {
 	}
 }
 
-func loginUser(login, email, inpPwd string) (database.User, loginStatus) {
-	if originPwd, ok := users[login]; !ok {
-		return database.User{}, UserUnexists
+func loginUser(login, inpPwd string) loginStatus {
+	err := database.LoginByNickname(login, inpPwd)
+
+	if !general.CheckError(err) {
+		return loginStatus(err.Error())
 	} else {
-		err := bcrypt.CompareHashAndPassword([]byte(originPwd), []byte(inpPwd))
-		if err != nil {
-			return database.User{}, IncorrectPassword
-		} else {
-			return database.User{}, LoginOK
-		}
+		return LoginOK
 	}
 }
 
@@ -293,9 +290,9 @@ func procLogin(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
-	inpEmail := r.PostForm.Get("email")
-	user, status := loginUser(inpLogin, inpEmail, inpPwd)
-	user = user
+	//inpEmail := r.PostForm.Get("email")
+	status := loginUser(inpLogin, inpPwd)
+	//user = user
 	tmpl, _ := template.ParseFiles("./templates/login.html")
 	switch status {
 	case LoginOK:
