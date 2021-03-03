@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"github.com/nebolax/LatenessStockExcahnge/database/models"
 	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math/rand"
 	"regexp"
@@ -208,4 +209,8 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 	}
 
 	return result, nil
+}
+
+func GetUser(nickname string) (models.User, error) {
+
 }
