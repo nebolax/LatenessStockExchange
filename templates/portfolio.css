@@ -1,0 +1,17 @@
+.key-val-field {
+    padding: 2% 8%;
+}
+
+.key-val-field * {
+    display: inline-block;
+}
+
+.null-pdmargin * {
+    padding: 0;
+    margin: 0;
+}
+
+#all-shares-in-portfolio {
+    list-style: none;
+    padding: 0;
+}

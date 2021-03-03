@@ -2,14 +2,15 @@ package netcommunicator
 
 import (
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/database"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
 	"strconv"
+
+	"github.com/nebolax/LatenessStockExcahnge/database"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -247,19 +248,22 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
-func showError(w http.ResponseWriter, r *http.Request, err NetError){
+func showError(w http.ResponseWriter, r *http.Request, err NetError) {
 	tmpl, _ := template.ParseFiles("./templates/error.html")
 	tmpl.Execute(w, err)
 }
 
 func portfolio(w http.ResponseWriter, r *http.Request) {
 	if isUserLoggedIn(r) {
-		userInfo := getUserInfo(r)
+		userInfo := database.User{2, "nebolax", "s22e_nebolsin@179.ru", 56.3, []database.Ownership{
+			{23, "shchmax", 2, 12.4},
+		}}
+		// userInfo := getUserInfo(r)
 
-		if userInfo == nil {
-			showError(w, r, NetError{"User not found!"})
-			return
-		}
+		// if userInfo == nil {
+		// 	showError(w, r, NetError{"User not found!"})
+		// 	return
+		// }
 
 		tmpl, _ := template.ParseFiles("./templates/portfolio.html")
 		tmpl.Execute(w, userInfo)
@@ -313,6 +317,10 @@ func getLoginHTML(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, "")
 }
 
+func landingPage(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
+}
+
 //StartServer is func
 func StartServer() {
 	router := mux.NewRouter().StrictSlash(true)
@@ -328,6 +336,7 @@ func StartServer() {
 	router.HandleFunc("/register", procRegister).Methods("POST")
 	router.HandleFunc("/register", getRegisterHTML).Methods("GET")
 	router.HandleFunc("/logout", logout).Methods("POST")
+	router.HandleFunc("/", landingPage)
 
 	router.HandleFunc("/ws/graph{id:[0-9]+}", handleConnections)
 	http.Handle("/", router)

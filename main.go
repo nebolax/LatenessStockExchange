@@ -3,16 +3,16 @@ package main
 
 import (
 	NetComms "github.com/nebolax/LatenessStockExcahnge/netcommunicator"
-	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor"
 	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor/pricescalc"
 )
 
 // Main function to call all other functions
 func main() {
-	for i := 0; i < len(pricesmonitor.AllCalculators); i++ {
-		procNewData(pricesmonitor.AllCalculators[i])
-	}
-	NetComms.StartServer()
+	// for i := 0; i < len(pricesmonitor.AllCalculators); i++ {
+	// 	procNewData(pricesmonitor.AllCalculators[i])
+	// }
+	// NetComms.StartServer()
+	send()
 }
 
 func procNewData(calc *pricescalc.RTPriceCalculator) {
