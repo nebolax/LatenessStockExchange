@@ -34,12 +34,6 @@ type graphPageSetup struct {
 	CurOffers int       `json:"offers"`
 }
 
-type oneStockInfo struct {
-	ID       int
-	Name     string
-	CurPrice float64
-}
-
 type regStatus int
 
 const (
@@ -184,10 +178,12 @@ func UpdateData(id int, message OutcomingMessage) {
 func allStocksObserver(w http.ResponseWriter, r *http.Request) {
 	if isUserLoggedIn(r) {
 		tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.html")
-		var ar []oneStockInfo
+		var ar []database.OneStockInfo
 		for _, calc := range pricesmonitor.AllCalculators {
-			ar = append(ar, oneStockInfo{ID: calc.ID, Name: calcsNames[calc.ID], CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
+			ar = append(ar, database.OneStockInfo{ID: calc.ID, Name: calc.Name, CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
 		}
+
+		fmt.Println(ar)
 		tmpl.Execute(w, ar)
 	} else {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)

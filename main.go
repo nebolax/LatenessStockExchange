@@ -11,6 +11,7 @@ import (
 // Main function to call all other functions
 func main() {
 	database.Init(database.StandartPath)
+	pricesmonitor.Init()
 	for i := 0; i < len(pricesmonitor.AllCalculators); i++ {
 		procNewData(pricesmonitor.AllCalculators[i])
 	}
