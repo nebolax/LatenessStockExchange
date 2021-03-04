@@ -81,17 +81,20 @@ func readSingleMessage(connID int) (incomingMessage, bool) {
 }
 
 func procIncomingMessages(connID int) {
+	client := clients[connID]
 	for {
 		msg, ok := readSingleMessage(connID)
 		if ok {
 			var offs int
 			if msg.OfferType == "sell" {
-				offs = clients[connID].calc.ReqOffer(connID, -1)
+				offs = client.calc.ReqOffer(client.userID, -1)
 			} else if msg.OfferType == "buy" {
-				offs = clients[connID].calc.ReqOffer(connID, 1)
+				offs = client.calc.ReqOffer(client.userID, 1)
 			}
 
-			sendtoUserDevices(clients[connID].userID, OutcomingMessage{Type: "personOffers", OffersCount: offs})
+			sendtoUserDevices(client.userID, OutcomingMessage{Type: "personOffers", OffersCount: offs})
+		} else {
+			break
 		}
 	}
 }

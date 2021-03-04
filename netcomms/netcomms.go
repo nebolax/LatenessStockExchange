@@ -1,6 +1,7 @@
 package netcommunicator
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -16,6 +17,7 @@ func showError(w http.ResponseWriter, r *http.Request, err error) {
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("reached")
 	http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
 }
 

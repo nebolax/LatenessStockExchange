@@ -5,18 +5,22 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math/rand"
 	"regexp"
 	"time"
+
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 // Name of batadase table with users
 const tableName = "users"
+
 // Key which is used in hash function
 var hashKey = "YaPёSiyPЁS"
+
 // The length of salt which would be added to password and hashKey
 const saltLength = 16
+
 // Able characters to use in salt
 const charset = "abcdefghijklmnopqrstuvwxyz" +
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -194,7 +198,7 @@ func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 }
 
 // Returns more info about investment portfolio of userId (see Ownership for more information)
-func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
+func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error) {
 	data, err := GetInvestmentPortfolio(userId)
 	if !general.CheckError(err) {
 		return nil, err
