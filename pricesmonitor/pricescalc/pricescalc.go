@@ -38,10 +38,6 @@ func (calc *RTPriceCalculator) ReqOffer(askerID, amount int) int {
 	} else {
 		calc.offers[askerID] = amount
 	}
-	if calc.offers[askerID] == 0 {
-		delete(calc.offers, askerID)
-		return 0
-	}
 	calc.CurHandler.CurOffers += amount
 	calc.LiveOffers <- calc.CurHandler.CurOffers
 

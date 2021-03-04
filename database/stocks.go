@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+
 	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
@@ -47,11 +48,10 @@ func GetAllStocks() ([]OneStockInfo, error) {
 
 	result, err := dataBase.Query("SELECT id, name, total_count FROM stocks")
 
-	defer result.Close()
-
 	if !general.CheckError(err) {
 		return nil, err
 	}
+	defer result.Close()
 
 	var allStocks = make([]OneStockInfo, 0)
 

@@ -49,15 +49,17 @@
             <canvas id="chart"></canvas>
         </div>
         <div>
+            {{ if eq . "loggedIn"}}
             <div style="display: inline-block; margin-left: 5%; min-width: 40%;">
                 <p>Your offer:</p>
-                <p>Sell/buy {{ personOffers }}</p>
+                <p>Sell/buy [[ personOffers ]]</p>
                 <button id="buyOfferBtn" style="width: 45%; height: 7%;">buy</button>
                 <button id="sellOfferBtn" style="width: 45%; height: 7%; float: right;">sell</button>
             </div>
+            {{ end }}
             <div style="float: right; margin-right: 5%;">
                 <p>Public offers:</p>
-                <p>Sell/buy {{ publicOffers }}</p>
+                <p>Sell/buy [[ publicOffers ]]</p>
             </div>
         </div>
     </div>

@@ -73,7 +73,7 @@ var (
 	calcsNames = map[int]string{
 		0: "Denis",
 		1: "Serzh",
-		2: "Leva",
+		2: "Lev",
 		3: "Pasha",
 		4: "Ilya",
 		5: "ShchMax",
@@ -192,22 +192,24 @@ func UpdateData(id int, message OutcomingMessage) {
 
 func allStocksObserver(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.html")
-	var ar []oneStockInfo
+	var ar []database.OneStockInfo
+	fmt.Println("len: ", len(pricesmonitor.AllCalculators))
 	for _, calc := range pricesmonitor.AllCalculators {
-		ar = append(ar, oneStockInfo{ID: calc.ID, Name: calcsNames[calc.ID], CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
+		ar = append(ar, database.OneStockInfo{ID: calc.ID, Name: calc.Name, CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
 	}
 	tmpl.Execute(w, ar)
 }
 
 func graphStockPage(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("./templates/graph-page.html")
+	checkerr(err)
 	if isUserLoggedIn(r) {
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
 		id++ //TODO protect system so that random person can't connect to our websocket and receive graph info
-		tmpl, _ := template.ParseFiles("./templates/graph-page.html")
-		tmpl.Execute(w, "")
+		tmpl.Execute(w, "loggedIn")
 	} else {
-
+		tmpl.Execute(w, "guest")
 	}
 }
 

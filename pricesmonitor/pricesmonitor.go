@@ -1,10 +1,11 @@
 package pricesmonitor
 
 import (
-	"github.com/nebolax/LatenessStockExcahnge/database"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math/rand"
 	"time"
+
+	"github.com/nebolax/LatenessStockExcahnge/database"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 
 	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor/pricescalc"
 )

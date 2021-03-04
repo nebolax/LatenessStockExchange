@@ -3,7 +3,8 @@ var vm = new Vue({
     data: {
         publicOffers: 0,
         personOffers: 0
-    }
+    },
+    delimiters: ['[[', ']]']
 })
 
 var ctx = document.getElementById('chart').getContext('2d');
