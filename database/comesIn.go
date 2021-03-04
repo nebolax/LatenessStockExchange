@@ -42,6 +42,8 @@ func AddCertification(stockId int, certifierId int, timestamp time.Time) (bool, 
 		return false, time.Time{}, cringe
 	}
 
+	defer result.Close()
+
 	var count = 0
 	var totalTime int64 = 0
 

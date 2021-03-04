@@ -31,6 +31,8 @@ func GetLatestPrice(stockId int) (float64, error) {
 		return 0, err
 	}
 
+	defer res.Close()
+
 	if res.Next() {
 		var value float64
 		err = res.Scan(&value)

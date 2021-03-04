@@ -1,7 +1,8 @@
 package pricesmonitor
 
 import (
-	"math"
+	"github.com/nebolax/LatenessStockExcahnge/database"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math/rand"
 	"time"
 
@@ -11,12 +12,21 @@ import (
 //AllCalculators contains all prices calculators
 var AllCalculators []*pricescalc.RTPriceCalculator
 
-func init() {
+func Init() {
 	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < 10; i++ {
-		mshares := rand.Int()%20 - 10
-		newCalc := pricescalc.CreatePriceCalculator(i, rand.Float64()*100, mshares, int(math.Abs(float64(mshares))))
+	AllCalculators = make([]*pricescalc.RTPriceCalculator, 0)
+
+	allStocks, err := database.GetAllStocks()
+
+	if !general.CheckError(err) {
+		return
+	}
+
+	for _, stock := range allStocks {
+		newCalc := pricescalc.CreatePriceCalculator(
+			stock.ID, stock.CurPrice, 0, stock.TotalCount, stock.Name)
+
 		AllCalculators = append(AllCalculators, newCalc)
 	}
 }

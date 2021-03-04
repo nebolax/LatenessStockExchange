@@ -75,6 +75,8 @@ func AddUser(nickname string, email string, password string) (int, error) {
 		return 0, err
 	}
 
+	defer result.Close()
+
 	if result.Next() {
 		var id int
 		err = result.Scan(&id)
@@ -124,11 +126,14 @@ func LoginByNickname(nickname string, password string) (int, error) {
 		return 0, DatabaseError{"Database is not initialized"}
 	}
 
-	query, err := dataBase.Query(fmt.Sprintf("SELECT password_salt, password_hash, id FROM users WHERE (username = '%s')", nickname))
+	query, err := dataBase.Query(fmt.Sprintf(
+		"SELECT password_salt, password_hash, id FROM users WHERE (username = '%s')", nickname))
 
 	if !general.CheckError(err) {
 		return 0, err
 	}
+
+	defer query.Close()
 
 	return login(query, password)
 }
@@ -148,6 +153,8 @@ func LoginByEmail(email string, password string) (int, error) {
 		return 0, err
 	}
 
+	defer query.Close()
+
 	return login(query, password)
 }
 
@@ -164,6 +171,8 @@ func GetInvestmentPortfolio(userId int) (map[int]int, error) {
 	if !general.CheckError(err) {
 		return nil, err
 	}
+
+	defer query.Close()
 
 	var result = make(map[int]int)
 
@@ -201,6 +210,8 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 			return nil, err
 		}
 
+		defer res.Close()
+
 		if res.Next() {
 			err = res.Scan(&ownership.Name)
 
@@ -209,14 +220,16 @@ func GetInvestmentPortfolioPretty(userId int) ([]Ownership, error){
 			}
 		}
 
-		res, err = dataBase.Query("SELECT price FROM price_logs WHERE (timestamp = (SELECT MAX(timestamp) FROM price_logs))")
+		res1, err := dataBase.Query("SELECT price FROM price_logs WHERE (timestamp = (SELECT MAX(timestamp) FROM price_logs))")
 
 		if !general.CheckError(err) {
 			return nil, err
 		}
 
-		if res.Next() {
-			err = res.Scan(&ownership.CostPerOne)
+		defer res1.Close()
+
+		if res1.Next() {
+			err = res1.Scan(&ownership.CostPerOne)
 
 			if !general.CheckError(err) {
 				return nil, err
@@ -238,6 +251,8 @@ func GetUser(id int) (*User, error) {
 	if !general.CheckError(err) {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	if rows.Next() {
 		var result User = User{}

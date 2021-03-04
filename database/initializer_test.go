@@ -55,7 +55,7 @@ func TestCreateTables(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	createTables(db)
+	createTables(db, testPath)
 
 	if !checkTables(db) {
 		t.Error("DB is not ok after creating")

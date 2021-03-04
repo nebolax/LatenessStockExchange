@@ -38,12 +38,6 @@ type graphPageSetup struct {
 	PersonOffers int       `json:"personOffers"`
 }
 
-type oneStockInfo struct {
-	ID       int
-	Name     string
-	CurPrice float64
-}
-
 type regStatus int
 
 const (

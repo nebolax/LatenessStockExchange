@@ -10,6 +10,7 @@ CREATE TABLE 'users' (
 CREATE TABLE 'stocks' (
     'id' INTEGER PRIMARY KEY AUTOINCREMENT,
     'name' VARCHAR (255) UNIQUE NOT NULL,
+    'total_count' INTEGER NOT NULL,
     'user_id' INTEGER NOT NULL,
     'come_in_time' DATETIME NULL
 );
