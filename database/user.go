@@ -1,9 +1,9 @@
 package database
 
 type User struct {
-	Id int
+	Id       int
 	Nickname string
-	Email string
-	Money float64
-	Stocks []Ownership
+	Email    string
+	Money    float64
+	Stocks   []Ownership
 }
