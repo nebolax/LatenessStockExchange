@@ -6,17 +6,13 @@ import (
 
 	"github.com/nebolax/LatenessStockExcahnge/database"
 	"github.com/nebolax/LatenessStockExcahnge/general"
-
-	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor/pricescalc"
+	"github.com/nebolax/LatenessStockExcahnge/netcomms/procs"
+	"github.com/nebolax/LatenessStockExcahnge/pricescalc"
 )
 
-//AllCalculators contains all prices calculators
-var AllCalculators []*pricescalc.RTPriceCalculator
-
+//Init function
 func Init() {
 	rand.Seed(time.Now().UnixNano())
-
-	AllCalculators = make([]*pricescalc.RTPriceCalculator, 0)
 
 	allStocks, err := database.GetAllStocks()
 
@@ -27,14 +23,33 @@ func Init() {
 	for _, stock := range allStocks {
 		newCalc := pricescalc.CreatePriceCalculator(
 			stock.ID, stock.CurPrice, 0, stock.TotalCount, stock.Name)
+		procNewData(newCalc)
+		pricescalc.AllCalculators[newCalc] = true
+	}
+}
 
-		AllCalculators = append(AllCalculators, newCalc)
+func procNewData(calc *pricescalc.RTPriceCalculator) {
+	go procNewStocks(calc.ID, calc.LiveStock)
+	go procNewOffers(calc.ID, calc.LiveOffers)
+}
+
+func procNewStocks(graphID int, ch chan float64) {
+	for {
+		newStock := <-ch
+		procs.SendtoGraphObservers(graphID, procs.OutcomingMessage{Type: "gpoint", StockPrice: newStock})
+	}
+}
+
+func procNewOffers(graphID int, ch chan int) {
+	for {
+		newOffers := <-ch
+		procs.SendtoGraphObservers(graphID, procs.OutcomingMessage{Type: "publicOffers", OffersCount: newOffers})
 	}
 }
 
 //CalcByID id a func
 func CalcByID(id int) *pricescalc.RTPriceCalculator {
-	for _, calc := range AllCalculators {
+	for calc := range pricescalc.AllCalculators {
 		if calc.ID == id {
 			return calc
 		}

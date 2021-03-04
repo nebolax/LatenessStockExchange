@@ -9,6 +9,9 @@ import (
 	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
+//AllCalculators contains all prices calculators
+var AllCalculators = make(map[*RTPriceCalculator]bool)
+
 const updateDatabasePeriod = 10
 
 type stockDataHandler struct {

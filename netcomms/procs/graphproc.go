@@ -5,7 +5,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/nebolax/LatenessStockExcahnge/netcomms/procs/connsinc"
-	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor/pricescalc"
+	"github.com/nebolax/LatenessStockExcahnge/pricescalc"
 )
 
 type sockClient struct {
@@ -16,7 +16,7 @@ type sockClient struct {
 }
 
 //OutcomingMessage is a struct
-type outcomingMessage struct {
+type OutcomingMessage struct {
 	Type        string  `json:"type"`
 	OffersCount int     `json:"offersCount"`
 	StockPrice  float64 `json:"stockPrice"`
@@ -35,8 +35,8 @@ type graphPageSetup struct {
 
 var clients = make(map[int]*sockClient)
 
-//sendtoGraphObservers is func
-func sendtoGraphObservers(graphID int, message interface{}) {
+//SendtoGraphObservers is func
+func SendtoGraphObservers(graphID int, message interface{}) {
 	for id, client := range clients {
 		if client.calc.ID == graphID {
 			writeSingleMessage(id, message)
@@ -91,7 +91,7 @@ func procIncomingMessages(connID int) {
 				offs = clients[connID].calc.ReqOffer(connID, 1)
 			}
 
-			sendtoUserDevices(clients[connID].userID, outcomingMessage{Type: "personOffers", OffersCount: offs})
+			sendtoUserDevices(clients[connID].userID, OutcomingMessage{Type: "personOffers", OffersCount: offs})
 		}
 	}
 }

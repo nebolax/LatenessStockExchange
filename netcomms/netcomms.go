@@ -1,4 +1,4 @@
-package netcomms
+package netcommunicator
 
 import (
 	"html/template"
