@@ -3,7 +3,6 @@ package netcommunicator
 import (
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -198,24 +197,24 @@ func UpdateData(id int, message OutcomingMessage) {
 }
 
 func allStocksObserver(w http.ResponseWriter, r *http.Request) {
-	if isUserLoggedIn(r) {
-		tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.html")
-		var ar []oneStockInfo
-		for _, calc := range pricesmonitor.AllCalculators {
-			ar = append(ar, oneStockInfo{ID: calc.ID, Name: calcsNames[calc.ID], CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
-		}
-		tmpl.Execute(w, ar)
-	} else {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	tmpl, _ := template.ParseFiles("./templates/all-stocks-observer.html")
+	var ar []oneStockInfo
+	for _, calc := range pricesmonitor.AllCalculators {
+		ar = append(ar, oneStockInfo{ID: calc.ID, Name: calcsNames[calc.ID], CurPrice: math.Round(calc.CurHandler.CurStock*100) / 100})
 	}
+	tmpl.Execute(w, ar)
 }
 
 func graphStockPage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["id"])
-	id++
-	file, _ := ioutil.ReadFile("./templates/graph-page.html")
-	w.Write(file)
+	if isUserLoggedIn(r) {
+		vars := mux.Vars(r)
+		id, _ := strconv.Atoi(vars["id"])
+		id++ //TODO protect system so that random person can't connect to our websocket and receive graph info
+		tmpl, _ := template.ParseFiles("./templates/graph-page.html")
+		tmpl.Execute(w, "")
+	} else {
+
+	}
 }
 
 func processRegisterError(err error) {
