@@ -20,14 +20,35 @@ type RTPriceCalculator struct {
 	LiveStock  chan float64
 	LiveOffers chan int
 	History    []float64
+	offers     map[int]int
 }
 
-//IncOffers is a very good func
-func (calc *RTPriceCalculator) IncOffers(val int) {
+//ReqOffer is a very good func
+func (calc *RTPriceCalculator) ReqOffer(askerID, amount int) int {
 	calc.CurHandler.mu.Lock()
-	calc.CurHandler.CurOffers += val
+	defer calc.CurHandler.mu.Unlock()
+	if _, ok := calc.offers[askerID]; ok {
+		calc.offers[askerID] += amount
+	} else {
+		calc.offers[askerID] = amount
+	}
+	if calc.offers[askerID] == 0 {
+		delete(calc.offers, askerID)
+		return 0
+	}
+	calc.CurHandler.CurOffers += amount
 	calc.LiveOffers <- calc.CurHandler.CurOffers
-	calc.CurHandler.mu.Unlock()
+
+	return calc.offers[askerID]
+}
+
+//PersonOffers is a func
+func (calc RTPriceCalculator) PersonOffers(personID int) int {
+	if _, ok := calc.offers[personID]; ok {
+		return calc.offers[personID]
+	} else {
+		return 0
+	}
 }
 
 func (calc *RTPriceCalculator) newPrice() float64 {
@@ -45,7 +66,7 @@ func (calc *RTPriceCalculator) newPrice() float64 {
 //CreatePriceCalculator is func
 func CreatePriceCalculator(id int, startStock float64, offers, sharesInTrade int) *RTPriceCalculator {
 	curHandler := stockDataHandler{CurStock: startStock, CurOffers: offers, SharesInTrade: sharesInTrade}
-	priceObs := RTPriceCalculator{id, &curHandler, make(chan float64), make(chan int), []float64{}}
+	priceObs := RTPriceCalculator{id, &curHandler, make(chan float64), make(chan int), []float64{}, make(map[int]int)}
 
 	go updatePrices(&priceObs)
 

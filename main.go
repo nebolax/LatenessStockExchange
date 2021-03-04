@@ -32,6 +32,6 @@ func procNewStocks(id int, ch chan float64) {
 func procNewOffers(id int, ch chan int) {
 	for {
 		newOffers := <-ch
-		NetComms.UpdateData(id, NetComms.OutcomingMessage{Type: "offers", OffersCount: newOffers})
+		NetComms.UpdateData(id, NetComms.OutcomingMessage{Type: "publicOffers", OffersCount: newOffers})
 	}
 }

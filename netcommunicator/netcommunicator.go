@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/nebolax/LatenessStockExcahnge/database"
 	"github.com/nebolax/LatenessStockExcahnge/general"
@@ -17,6 +18,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/nebolax/LatenessStockExcahnge/pricesmonitor"
 )
+
+//TODO add mutexes on clients to remove concurrent csocket writing
 
 //OutcomingMessage is a struct
 type OutcomingMessage struct {
@@ -30,9 +33,10 @@ type incomingMessage struct {
 	OfferType string `json:"offerType"`
 }
 type graphPageSetup struct {
-	Type      string    `json:"type"`
-	History   []float64 `json:"history"`
-	CurOffers int       `json:"offers"`
+	Type         string    `json:"type"`
+	History      []float64 `json:"history"`
+	PublicOffers int       `json:"publicOffers"`
+	PersonOffers int       `json:"personOffers"`
 }
 
 type oneStockInfo struct {
@@ -61,9 +65,14 @@ const (
 	IncorrectPassword loginStatus = "Incorrect password"
 )
 
+type sockConn struct {
+	id int
+	mu sync.Mutex
+}
+
 var (
 	users     = make(map[string]string)
-	clients   = make(map[*websocket.Conn]int)
+	clients   = make(map[*websocket.Conn]*sockConn)
 	broadcast = make(chan int)
 	key       = []byte("super-secret-key")
 	store     = sessions.NewCookieStore(key)
@@ -129,20 +138,23 @@ func checkerr(err error) {
 }
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "user-info")
+	userID, _ := session.Values["userid"].(int)
+
 	ws, err := websocket.Upgrade(w, r, nil, 0, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["id"])
+	graphID, _ := strconv.Atoi(vars["id"])
 
-	clients[ws] = id
+	clients[ws] = &sockConn{id: graphID}
 	defer ws.Close()
 
-	if calc := pricesmonitor.CalcByID(id); calc != nil {
+	if calc := pricesmonitor.CalcByID(graphID); calc != nil {
 		fmt.Printf("Id: %d, Offs: %d, st: %#v\n", calc.ID, calc.CurHandler.CurOffers, calc.History)
-		ws.WriteJSON(graphPageSetup{"setup", calc.History, calc.CurHandler.CurOffers})
+		ws.WriteJSON(graphPageSetup{"setup", calc.History, calc.CurHandler.CurOffers, calc.PersonOffers(userID)})
 	}
 
 	//Reading data from clients
@@ -154,30 +166,33 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 			delete(clients, ws)
 			break
 		}
-		var inc int
+		var offs int
 		if msg.OfferType == "sell" {
-			inc = -1
+			offs = pricesmonitor.CalcByID(graphID).ReqOffer(userID, -1)
 		} else if msg.OfferType == "buy" {
-			inc = 1
+			offs = pricesmonitor.CalcByID(graphID).ReqOffer(userID, 1)
 		}
-		for _, calc := range pricesmonitor.AllCalculators {
-			if calc.ID == id {
-				calc.IncOffers(inc)
-			}
+
+		clients[ws].mu.Lock()
+		err = ws.WriteJSON(OutcomingMessage{Type: "personOffers", OffersCount: offs})
+		if err != nil {
+			delete(clients, ws)
 		}
-		fmt.Printf("New message: %s\n", msg.OfferType)
+		clients[ws].mu.Unlock()
 	}
 }
 
 //UpdateData is func
 func UpdateData(id int, message OutcomingMessage) {
 	for client := range clients {
-		if clients[client] == id {
+		if clients[client].id == id {
+			clients[client].mu.Lock()
 			err := client.WriteJSON(message)
 			if err != nil {
 				defer client.Close()
 				delete(clients, client)
 			}
+			clients[client].mu.Unlock()
 		}
 	}
 }
@@ -256,7 +271,6 @@ func portfolio(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println("ok")
 		tmpl, err := template.ParseFiles("./templates/portfolio.html")
 		checkerr(err)
 		tmpl.Execute(w, userInfo)

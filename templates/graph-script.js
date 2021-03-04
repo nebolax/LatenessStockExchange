@@ -1,7 +1,8 @@
 var vm = new Vue({
     el: "#main",
     data: {
-        curOffers: 0
+        publicOffers: 0,
+        personOffers: 0
     }
 })
 
@@ -40,7 +41,8 @@ ws.onmessage = function(e) {
                 conf.datasets[0].data.push(message.history[i])
             }
             chart.update();
-            vm.curOffers = message.offers;
+            vm.publicOffers = message.publicOffers;
+            vm.personOffers = message.personOffers;
             break;
         case "gpoint":
             var conf = chart.config.data;
@@ -52,8 +54,11 @@ ws.onmessage = function(e) {
             }
             chart.update();
             break;
-        case "offers":
-            vm.curOffers = message.offersCount;
+        case "publicOffers":
+            vm.publicOffers = message.offersCount;
+            break;
+        case "personOffers":
+            vm.personOffers = message.offersCount;
             break;
         default:
             console.error("Unknow message type of mesage:");
