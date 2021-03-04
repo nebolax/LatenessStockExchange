@@ -1,8 +1,9 @@
 package database
 
 import (
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"testing"
+
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 func TestAddStock(t *testing.T) {

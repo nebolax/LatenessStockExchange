@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/nebolax/LatenessStockExcahnge/general/status"
 	"github.com/nebolax/LatenessStockExcahnge/netcomms/procs"
 )
 
@@ -17,12 +18,12 @@ func ProcRegister(w http.ResponseWriter, r *http.Request) {
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
 	inpEmail := r.PostForm.Get("email")
-	id, status := procs.RegUser(inpLogin, inpEmail, inpPwd)
-	switch status {
-	case procs.NewUserConfirmed:
+	id, cs := procs.RegUser(inpLogin, inpEmail, inpPwd)
+	switch cs {
+	case status.OK:
 		procs.SetSessionUserID(w, r, id)
 		http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
-	case procs.UserRegFail:
+	case status.UserRegFail:
 		tmpl, _ := template.ParseFiles("./templates/register.html")
 		tmpl.Execute(w, "User already exists")
 	}
@@ -38,15 +39,15 @@ func ProcLogin(w http.ResponseWriter, r *http.Request) {
 	inpLogin := r.PostForm.Get("login")
 	inpPwd := r.PostForm.Get("password")
 	//inpEmail := r.PostForm.Get("email")
-	id, status := procs.LoginUser(inpLogin, inpPwd)
+	id, cs := procs.LoginUser(inpLogin, inpPwd)
 	tmpl, _ := template.ParseFiles("./templates/login.html")
-	switch status {
-	case procs.LoginOK:
+	switch cs {
+	case status.OK:
 		procs.SetSessionUserID(w, r, id)
 		http.Redirect(w, r, "/portfolio", http.StatusSeeOther)
-	case procs.UserUnexists:
+	case status.NoSuchUser:
 		tmpl.Execute(w, "user does not exist")
-	case procs.IncorrectPassword:
+	case status.IncorrectPassword:
 		tmpl.Execute(w, "incorrect password")
 	}
 }

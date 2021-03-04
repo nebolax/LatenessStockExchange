@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/nebolax/LatenessStockExcahnge/database"
 	"github.com/nebolax/LatenessStockExcahnge/general"
+	"github.com/nebolax/LatenessStockExcahnge/general/status"
 )
 
 var (
@@ -14,16 +15,16 @@ var (
 )
 
 //GetSessionUserInfo is func
-func GetSessionUserInfo(r *http.Request) (*database.User, error) {
+func GetSessionUserInfo(r *http.Request) (*database.User, status.StatusCode) {
 	id := GetSessionUserID(r)
 
 	result, err := database.GetUser(id)
 
 	if !general.CheckError(err) {
-		return nil, err
+		return nil, status.DatabaseError
 	}
 
-	return result, nil
+	return result, status.OK
 }
 
 //IsUserLoggedIn is func

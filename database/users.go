@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/nebolax/LatenessStockExcahnge/general"
+	"github.com/nebolax/LatenessStockExcahnge/general/status"
 )
 
 // Name of batadase table with users
@@ -93,7 +94,7 @@ func AddUser(nickname string, email string, password string) (int, error) {
 
 // Tries to login user from sql query using given password. Returns error if something went wrong
 // Returns nil if everything is OK
-func login(user *sql.Rows, password string) (int, error) {
+func login(user *sql.Rows, password string) (int, status.StatusCode) {
 	if user.Next() {
 		var salt string
 		var passwordHash string
@@ -102,7 +103,7 @@ func login(user *sql.Rows, password string) (int, error) {
 		err := user.Scan(&salt, &passwordHash, &id)
 
 		if !general.CheckError(err) {
-			return 0, err
+			return 0, status.DatabaseError
 		}
 
 		resultString := password + hashKey + salt
@@ -112,29 +113,29 @@ func login(user *sql.Rows, password string) (int, error) {
 		hash := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
 		if hash != passwordHash {
-			return 0, DatabaseError{"Password does not match!"}
+			return 0, status.IncorrectPassword
 		} else {
-			return id, nil
+			return id, status.OK
 		}
 
 	} else {
-		return 0, DatabaseError{"There is no such user"}
+		return 0, status.NoSuchUser
 	}
 }
 
 // Tries to login user with given nickname by given password
 // Returns error if something went wrong
 // Returns nil if everything is OK
-func LoginByNickname(nickname string, password string) (int, error) {
+func LoginByNickname(nickname string, password string) (int, status.StatusCode) {
 	if !initialized {
-		return 0, DatabaseError{"Database is not initialized"}
+		return 0, status.DatabaseNotInited
 	}
 
 	query, err := dataBase.Query(fmt.Sprintf(
 		"SELECT password_salt, password_hash, id FROM users WHERE (username = '%s')", nickname))
 
 	if !general.CheckError(err) {
-		return 0, err
+		return 0, status.DatabaseError
 	}
 
 	defer query.Close()
@@ -145,16 +146,16 @@ func LoginByNickname(nickname string, password string) (int, error) {
 // Tries to login user with given email by given password
 // Returns error if something went wrong
 // Returns nil if everything is OK
-func LoginByEmail(email string, password string) (int, error) {
+func LoginByEmail(email string, password string) (int, status.StatusCode) {
 	if !initialized {
-		return 0, DatabaseError{"Database is not initialized"}
+		return 0, status.DatabaseNotInited
 	}
 
 	query, err := dataBase.Query(fmt.Sprintf(
 		"SELECT password_salt, password_hash FROM users WHERE (email = '%s')", email))
 
 	if !general.CheckError(err) {
-		return 0, err
+		return 0, status.DatabaseError
 	}
 
 	defer query.Close()

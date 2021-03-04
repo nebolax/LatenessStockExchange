@@ -2,7 +2,6 @@ package netcommunicator
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
@@ -10,11 +9,6 @@ import (
 
 	"github.com/nebolax/LatenessStockExcahnge/netcomms/pages"
 )
-
-func showError(w http.ResponseWriter, r *http.Request, err error) {
-	tmpl, _ := template.ParseFiles("./templates/error.html")
-	tmpl.Execute(w, err)
-}
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("reached")

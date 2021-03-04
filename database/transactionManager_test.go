@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"testing"
+
 	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
@@ -13,7 +14,7 @@ func TestGetResources(t *testing.T) {
 	stockId := 234
 	amount := 222
 	_, _ = dataBase.Exec(fmt.Sprintf(
-		"INSERT INTO user_stock_ownerships (user_id, stock_id, Amount) " +
+		"INSERT INTO user_stock_ownerships (user_id, stock_id, Amount) "+
 			"values (%d, %d, %d)", userId, stockId, amount))
 
 	result, err := getResources(userId, stockId)
@@ -32,8 +33,8 @@ func TestGetGritscoins(t *testing.T) {
 	userId := 123
 	amount := 222.333
 	_, _ = dataBase.Exec(fmt.Sprintf(
-		"INSERT INTO users " +
-			"(id, username, email, password_hash, password_salt, money) " +
+		"INSERT INTO users "+
+			"(id, username, email, password_hash, password_salt, money) "+
 			"values (%d, 'pes', 'pes@pes.pes', '!@#$1111', 'qwerty', %f)", userId, amount))
 
 	result, err := getGritscoins(userId)
@@ -47,7 +48,7 @@ func TestGetGritscoins(t *testing.T) {
 	}
 }
 
-func prepareForTestMakeTransaction(){
+func prepareForTestMakeTransaction() {
 
 	_, _ = dataBase.Exec("INSERT INTO users " +
 		"(id, username, email, password_hash, password_salt, money) " +
@@ -57,11 +58,9 @@ func prepareForTestMakeTransaction(){
 		"(id, username, email, password_hash, password_salt, money) " +
 		"values (2, 'pes2', 'pes2@pes.pes', '!@#$1111', 'qwerty', 110.0)")
 
-
 	_, _ = dataBase.Exec(
 		"INSERT INTO user_stock_ownerships (user_id, stock_id, Amount) values (1, 1, 10)")
 }
-
 
 func TestMakeTransactionFailMoney(t *testing.T) {
 	defer clearTest()
@@ -73,7 +72,7 @@ func TestMakeTransactionFailMoney(t *testing.T) {
 
 	if general.CheckError(err) {
 		t.Error("No error!!!")
-	} else{
+	} else {
 		if err.Error() != "Buyer has not enough money for deal" {
 			t.Error("Wrong error message: " + err.Error())
 		}
@@ -160,7 +159,7 @@ func TestDividends(t *testing.T) {
 		var money float64
 		_ = res.Scan(&money)
 
-		if math.Abs((money - 100.0) - price * 10 * percentage) > 0.01 {
+		if math.Abs((money-100.0)-price*10*percentage) > 0.01 {
 			t.Error("Dividends does not match!!")
 		}
 	} else {

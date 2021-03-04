@@ -30,7 +30,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 func GraphStockPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("./templates/graph-page.html")
-	checkerr(err)
+	general.CheckError(err)
 	if procs.IsUserLoggedIn(r) {
 		tmpl.Execute(w, "loggedIn")
 	} else {

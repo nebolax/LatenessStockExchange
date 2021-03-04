@@ -3,15 +3,15 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"io/ioutil"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 const StandartPath = "database\\storage\\"
 const testPath = "storage\\"
-
 
 // List of names of database tables. It is used to check if database is incomplete
 var tableNameList = [7]string{"users", "stocks", "user_stock_ownerships",
@@ -30,13 +30,13 @@ func checkTables(db *sql.DB) bool {
 	tablesNames := make([]string, len(tableNameList))
 	copy(tablesNames, tableNameList[:])
 
-	for tables.Next(){
+	for tables.Next() {
 		var name string
 		err := tables.Scan(&name)
 		if !general.CheckError(err) {
 			return false
 		}
-		for index, value := range  tablesNames {
+		for index, value := range tablesNames {
 			if value == name {
 				tablesNames = general.Remove(tablesNames, index)
 				break
@@ -64,7 +64,7 @@ func createTables(db *sql.DB, path string) {
 
 // Initialization of database. If something is wrong, recreate all database
 func Init(path string) {
-	db, err := sql.Open("sqlite3", path + "database.db")
+	db, err := sql.Open("sqlite3", path+"database.db")
 	general.CheckError(err)
 	var dbOk = checkTables(db)
 	if !dbOk {
@@ -74,4 +74,3 @@ func Init(path string) {
 	initialized = true
 	dataBase = Database{db: db}
 }
-

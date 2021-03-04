@@ -2,8 +2,9 @@ package database
 
 import (
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"time"
+
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 // Insert updated price to stock
@@ -23,8 +24,8 @@ func UpdatePrice(stockId int, price float64) error {
 
 func GetLatestPrice(stockId int) (float64, error) {
 	res, err := dataBase.Query(
-		fmt.Sprintf("SELECT price FROM price_logs WHERE " +
-			"(timestamp = (SELECT MAX(timestamp) FROM price_logs WHERE (stock_id = %d))) " +
+		fmt.Sprintf("SELECT price FROM price_logs WHERE "+
+			"(timestamp = (SELECT MAX(timestamp) FROM price_logs WHERE (stock_id = %d))) "+
 			"AND (stock_id = %d)", stockId, stockId))
 
 	if !general.CheckError(err) {

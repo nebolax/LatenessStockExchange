@@ -2,8 +2,9 @@ package database
 
 import (
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"time"
+
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 // Id of gritscoin in table with stocks
@@ -11,8 +12,8 @@ const gritscoinId = 0
 
 //Possible actions
 const (
-	sell = iota
-	buy = iota
+	sell      = iota
+	buy       = iota
 	dividends = iota
 )
 
@@ -105,25 +106,25 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 
 	baseMoney := "UPDATE users SET money = %f WHERE (user_id = %d)"
 
-	updateSellerStocks := fmt.Sprintf(baseStock, sellerStocks - amount, sellerId, stockId)
+	updateSellerStocks := fmt.Sprintf(baseStock, sellerStocks-amount, sellerId, stockId)
 	_, err = dataBase.Exec(updateSellerStocks)
 	if !general.CheckError(err) {
 		return err
 	}
 
-	updateBuyerCoins := fmt.Sprintf(baseMoney, buyerGritscoins - totalDealPrice, buyerId)
+	updateBuyerCoins := fmt.Sprintf(baseMoney, buyerGritscoins-totalDealPrice, buyerId)
 	_, err = dataBase.Exec(updateBuyerCoins)
 	if !general.CheckError(err) {
 		return err
 	}
 
-	updateSellerCoins := fmt.Sprintf(baseMoney, sellerGritscoins + totalDealPrice, sellerId)
+	updateSellerCoins := fmt.Sprintf(baseMoney, sellerGritscoins+totalDealPrice, sellerId)
 	_, err = dataBase.Exec(updateSellerCoins)
 	if !general.CheckError(err) {
 		return err
 	}
 
-	updateBuyerStocks := fmt.Sprintf(baseStock, buyerStocks + amount, buyerId, stockId)
+	updateBuyerStocks := fmt.Sprintf(baseStock, buyerStocks+amount, buyerId, stockId)
 	_, err = dataBase.Exec(updateBuyerStocks)
 	if !general.CheckError(err) {
 		return err
@@ -132,7 +133,7 @@ func MakeTransaction(sellerId int, buyerId int, stockId int, amount int, current
 	addTransaction := "INSERT INTO transaction_logs (user_id, stock_id, Amount, money_spent, type, timestamp) " +
 		"values (%d, %d, %d, %f, %d, %s)"
 	_, err = dataBase.Exec(fmt.Sprintf(addTransaction, sellerId, stockId, amount,
-		-1 * totalDealPrice, sell, time.Now().Format(datetimeFormat)))
+		-1*totalDealPrice, sell, time.Now().Format(datetimeFormat)))
 	if !general.CheckError(err) {
 		return err
 	}
@@ -187,7 +188,6 @@ func Dividends(stockId int, percentage float64) error {
 		countResponse, err := dataBase.Query(fmt.Sprintf(
 			"SELECT money FROM user WHERE (user_id = %d)", userId))
 
-
 		if !general.CheckError(err) {
 			return err
 		}
@@ -212,8 +212,8 @@ func Dividends(stockId int, percentage float64) error {
 			}
 
 			_, err = dataBase.Exec(fmt.Sprintf(
-				"INSERT INTO transaction_logs (user_id, stock_id, Amount, money_spent, type, timestamp) " +
-				"values (%d, %d, %d, %f, %d, %s)",
+				"INSERT INTO transaction_logs (user_id, stock_id, Amount, money_spent, type, timestamp) "+
+					"values (%d, %d, %d, %f, %d, %s)",
 				userId, stockId, amount, -delta, dividends, time.Now().Format(datetimeFormat)))
 
 			if !general.CheckError(err) {

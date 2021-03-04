@@ -2,8 +2,9 @@ package database
 
 import (
 	"fmt"
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"time"
+
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 const certificationsBoundary = 2
@@ -63,7 +64,7 @@ func AddCertification(stockId int, certifierId int, timestamp time.Time) (bool, 
 	// If it is exactly (no less - not enough, no more - already registered) needed Amount of certifications
 	if count == certificationsBoundary {
 		totalTime = totalTime / int64(count)
-		realTimestamp := time.Unix(0, totalTime * int64(time.Millisecond))
+		realTimestamp := time.Unix(0, totalTime*int64(time.Millisecond))
 
 		return true, realTimestamp, nil
 	}

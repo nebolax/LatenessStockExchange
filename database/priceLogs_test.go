@@ -1,9 +1,10 @@
 package database
 
 import (
-	"github.com/nebolax/LatenessStockExcahnge/general"
 	"math"
 	"testing"
+
+	"github.com/nebolax/LatenessStockExcahnge/general"
 )
 
 func TestUpdatePrice(t *testing.T) {
@@ -23,7 +24,7 @@ func TestUpdatePrice(t *testing.T) {
 		t.Error("Some error occurred: " + err.Error())
 	}
 
-	if math.Abs(data - value) > 0.01 {
+	if math.Abs(data-value) > 0.01 {
 		t.Error("Source value not equals result value")
 	}
 }

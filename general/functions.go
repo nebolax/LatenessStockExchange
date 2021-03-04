@@ -19,7 +19,7 @@ func TimeToString(time time.Time) string {
 }
 
 // Check error for null-ness (if there any exception)
-func CheckError(err error) bool{
+func CheckError(err error) bool {
 	if err != nil {
 		fmt.Println(err)
 		if DebugMode {
